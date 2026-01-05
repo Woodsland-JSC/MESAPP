@@ -191,10 +191,6 @@ class ReportController extends Controller
 
     function DryingQueueReport(Request $request)
     {
-        $fromDate = $request->input('fromDate');
-        $toDate = $request->input('toDate');
-        $factory = $request->input('factory');
-
         $validate = Validator::make($request->all(), [
             'fromDate' => 'required|date',
             'toDate' => 'required|date',
@@ -205,73 +201,82 @@ class ReportController extends Controller
             return response()->json(['error' => $validate->errors()], 400);
         }
 
+        $fromDate = $request->input('fromDate');
+        $toDate = $request->input('toDate');
+        $factory = $request->input('factory');
+
         try {
             // Lấy danh sách ItemName từ SAP
-            $conDB = (new ConnectController)->connect_sap();
-            $query = 'SELECT "ItemCode", "ItemName" FROM OITM';
-            $stmt = odbc_prepare($conDB, $query);
+            // $conDB = (new ConnectController)->connect_sap();
+            // $query = 'SELECT "ItemCode", "ItemName" FROM OITM';
+            // $stmt = odbc_prepare($conDB, $query);
 
-            if (!$stmt) {
-                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
-            }
+            // if (!$stmt) {
+            //     throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            // }
 
-            if (!odbc_execute($stmt)) {
-                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-            }
+            // if (!odbc_execute($stmt)) {
+            //     throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            // }
 
-            $sapItems = array();
-            while ($row = odbc_fetch_array($stmt)) {
-                $sapItems[$row['ItemCode']] = $row['ItemName'];
-            }
-            odbc_close($conDB);
+            // $sapItems = array();
+            // while ($row = odbc_fetch_array($stmt)) {
+            //     $sapItems[$row['ItemCode']] = $row['ItemName'];
+            // }
+            // odbc_close($conDB);
 
-            // Lấy dữ liệu pallet với điều kiện lọc
-            $pallets = Pallet::with(['details', 'createdBy', 'employeeInfo'])
-                ->where('factory', $factory)
-                ->whereBetween('created_at', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()])
-                ->get();
+            // // Lấy dữ liệu pallet với điều kiện lọc
+            // $pallets = Pallet::with(['details', 'createdBy', 'employeeInfo'])
+            //     ->where('factory', $factory)
+            //     ->whereBetween('created_at', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()])
+            //     ->get();
 
 
             $result = [];
 
-            foreach ($pallets as $pallet) {
-                foreach ($pallet->details as $detail) {
-                    // if($pallet->CompletedBy){
-                    //     $status = 'Đã sấy';
-                    // }else if(!$pallet->CompletedBy && $pallet->RanBy){
-                    //     $status = 'Đang sấy';
-                    // }else{
-                    //     $status = 'Chưa sấy';
-                    // }
-                    $status = '';
+            // foreach ($pallets as $pallet) {
+            //     foreach ($pallet->details as $detail) {
+            //         // if($pallet->CompletedBy){
+            //         //     $status = 'Đã sấy';
+            //         // }else if(!$pallet->CompletedBy && $pallet->RanBy){
+            //         //     $status = 'Đang sấy';
+            //         // }else{
+            //         //     $status = 'Chưa sấy';
+            //         // }
+            //         $status = '';
 
-                    if ($pallet->activeStatus == 0) {
-                        $status = 'Chưa sấy';
-                    } else if ($pallet->activeStatus == 1 && !$pallet->CompletedBy) {
-                        $status = 'Đang sấy';
-                    } else {
-                        $status = 'Đã sấy';
-                    }
+            //         if ($pallet->activeStatus == 0) {
+            //             $status = 'Chưa sấy';
+            //         } else if ($pallet->activeStatus == 1 && !$pallet->CompletedBy) {
+            //             $status = 'Đang sấy';
+            //         } else {
+            //             $status = 'Đã sấy';
+            //         }
 
-                    $result[] = [
-                        'created_at' => Carbon::parse($pallet->created_at)->format('H:i:s d/m/Y'),
-                        'code' => $pallet->Code,
-                        'ma_lo' => $pallet->MaLo,
-                        'item_code' => $detail->ItemCode,
-                        'item_name' => $sapItems[$detail->ItemCode] ?? 'Không xác định',
-                        'dai' => $detail->CDai,
-                        'rong' => $detail->CRong,
-                        'day' => $detail->CDay,
-                        'qty' => $detail->Qty_T,
-                        'mass' => round($detail->Qty, 6),
-                        'reason' => $pallet->LyDo,
-                        'status' => $status,
-                        'created_username' => $pallet->employeeInfo->username,
-                        'created_fullname' => $pallet->employeeInfo->last_name . ' ' . $pallet->employeeInfo->first_name,
-                        'stacking_time' => $pallet->stacking_time
-                    ];
-                }
-            }
+            //         $result[] = [
+            //             'created_at' => Carbon::parse($pallet->created_at)->format('H:i:s d/m/Y'),
+            //             'code' => $pallet->Code,
+            //             'ma_lo' => $pallet->MaLo,
+            //             'item_code' => $detail->ItemCode,
+            //             'item_name' => $sapItems[$detail->ItemCode] ?? 'Không xác định',
+            //             'dai' => $detail->CDai,
+            //             'rong' => $detail->CRong,
+            //             'day' => $detail->CDay,
+            //             'qty' => $detail->Qty_T,
+            //             'mass' => round($detail->Qty, 6),
+            //             'reason' => $pallet->LyDo,
+            //             'status' => $status,
+            //             'created_username' => $pallet->employeeInfo->username,
+            //             'created_fullname' => $pallet->employeeInfo->last_name . ' ' . $pallet->employeeInfo->first_name,
+            //             'stacking_time' => $pallet->stacking_time
+            //         ];
+            //     }
+            // }
+
+            $result = DB::table('vw_dongia_xepsay')
+                ->where('factory', $factory)
+                ->whereBetween('created_at', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()])
+                ->get();
 
             return response()->json($result, 200);
         } catch (\Exception $e) {
