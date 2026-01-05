@@ -48,6 +48,17 @@ class ImportController extends Controller
         // } catch (Exception $e) {
         //     dd($e);
         // }
+        $data = DB::table('failed_jobs')->get();
+
+        foreach ($data as $key => $item) {
+            $id = $item->id;
+            $payload = json_decode($item->payload, true);
+
+            if($payload['displayName'] == 'App\\Jobs\\inventorytransfer') {
+                $command = unserialize($payload['data']['command']);
+                dd($command);
+            }
+        }
     }
 
     public function import_pallet(Request $request)

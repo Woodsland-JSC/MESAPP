@@ -211,14 +211,14 @@
                 <label class="btn" for="fileInput" style="margin-top:10px">Chọn file</label>
                 <input id="fileInput" name='file' type="file" accept=".xlsx,.xls" style="display:none" />
             </section>
-            <div>
+            {{-- <div>
                 <select name="factory" style="width: 200px;">
                     <option value="TB" >TB</option>
                     <option value="YS" selected>YS</option>
                 </select>
             </div>
 
-            <div class="files" id="fileList" aria-live="polite"></div>
+            <div class="files" id="fileList" aria-live="polite"></div> --}}
 
             <div class="controls">
                 <button class="btn" id="uploadBtn" type="submit">Upload</button>
@@ -226,7 +226,7 @@
         </form>
     </main>
 
-    <script>
+    {{-- <script>
         let fileElement = document.getElementById('fileInput');
         let fileNameElement = document.getElementById('file-name');
 
@@ -237,7 +237,7 @@
             let filename = file.name;
             fileNameElement.innerHTML = filename;
         })
-    </script>
+    </script> --}}
 </body>
 
 </html>
