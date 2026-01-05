@@ -346,20 +346,35 @@ function BaoCaoTonSayLua() {
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState([
         {
-            headerName: "Tên",
-            field: "itemName",
-            minWidth: 400,
-            headerComponentParams: { displayName: "Tên" },
-            filter: true,
-            headerClass: 'text-center',
-            pinned: 'left',
+            headerName: "Tên / Quy cách",
+            rowGroup: true,
+            hide: true,
             valueGetter: (params) => {
-                if(params.node.id == 'rowGroupFooter_ROOT_NODE_ID'){
-                    return "Tổng";
-                }
-                return params.data ? params.data.itemName : "";
-            }
+                if (!params.data) return '';
+                if (params.node.id == 'rowGroupFooter_ROOT_NODE_ID') return '';
+                console.log(params.data);
+                
+                const { itemName, day, rong, dai } = params.data;
+                return `${itemName} - ${day}x${rong}x${dai}`;
+            },
+            minWidth: 400,
+            pinned: 'left',
         },
+        // {
+        //     headerName: "Tên",
+        //     field: "itemName",
+        //     width: 250,
+        //     headerComponentParams: { displayName: "Tên" },
+        //     filter: true,
+        //     headerClass: 'text-center',
+        //     // pinned: 'left',
+        //     valueGetter: (params) => {
+        //         if (params.node.id == 'rowGroupFooter_ROOT_NODE_ID') {
+        //             return "Tổng";
+        //         }
+        //         return params.data ? params.data.itemName : "";
+        //     }
+        // },
         {
             headerName: "Quy cách",
             children: [
@@ -368,21 +383,21 @@ function BaoCaoTonSayLua() {
                     field: "day",
                     width: 120,
                     filter: true,
-                    pinned: 'left',
+                    // pinned: 'left',
                 },
                 {
                     headerName: "Rộng",
                     field: "rong",
                     width: 120,
                     filter: true,
-                    pinned: 'left',
+                    // pinned: 'left',
                 },
                 {
                     headerName: "Dài",
                     field: "dai",
                     width: 120,
                     filter: true,
-                    pinned: 'left',
+                    // pinned: 'left',
                 },
             ],
         },
@@ -741,31 +756,6 @@ function BaoCaoTonSayLua() {
                         {/* Filter */}
                         <div className="flex items-center space-x-3 divide-x-2 divide-gray-100 px-4 mt-1">
                             <div className="flex space-x-3 w-1/2">
-                                {/* <div className="col-span-1 w-full">
-                                    <label
-                                        htmlFor="indate"
-                                        className="block mb-1 text-sm font-medium text-gray-900 "
-                                    >
-                                        Từ ngày
-                                    </label>
-                                    <DatePicker
-                                        selected={fromDate}
-                                        dateFormat="dd/MM/yyyy"
-                                        onChange={(date) => {
-                                            setFromDate(date);
-                                            // if (
-                                            //     fromDate &&
-                                            //     toDate &&
-                                            //     selectedFactory &&
-                                            //     isReceived &&
-                                            //     selectedTeams
-                                            // ) {
-                                            //     getReportData();
-                                            // }
-                                        }}
-                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
-                                    />
-                                </div> */}
                                 <div className="col-span-1 w-1/2">
                                     <label
                                         htmlFor="indate"
@@ -811,15 +801,15 @@ function BaoCaoTonSayLua() {
                                             groupDisplayType={groupDisplayType}
                                             localeText={localeText}
                                             grandTotalRow={"bottom"}
-                                            // autoGroupColumnDef={{
-                                            //     headerName: "Tên nhóm",
-                                            //     field: "itemName",
-                                            //     pinned: "left", // Pin về bên trái
-                                            //     minWidth: 220,
-                                            //     cellRendererParams: {
-                                            //         suppressCount: false
-                                            //     }
-                                            // }}
+                                        // autoGroupColumnDef={{
+                                        //     headerName: "Tên nhóm",
+                                        //     field: "itemName",
+                                        //     pinned: "left", // Pin về bên trái
+                                        //     minWidth: 220,
+                                        //     cellRendererParams: {
+                                        //         suppressCount: false
+                                        //     }
+                                        // }}
                                         />
                                     </div>
                                 </div>
