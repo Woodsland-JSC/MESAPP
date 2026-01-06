@@ -543,6 +543,10 @@ class DryingOvenController extends Controller
         $stockTransferCancelResponse = null;
         $palletCancelResponse = null;
 
+        if(Auth::user()->role != '1'){
+            throw new \Exception("Không có quyền hủy Pallet. Vui lòng liên hệ quản trị hệ thống.");
+        }
+
         try {
             DB::beginTransaction();
 
