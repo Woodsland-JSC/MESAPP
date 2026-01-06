@@ -185,7 +185,10 @@ function FactoryTransfer() {
                 width: 150,
                 suppressHeaderMenuButton: true,
                 valueFormatter: (params) => {
-                    return formatNumber(Number(params.value) || 0)
+                    return params.value ? Number(params.value).toLocaleString('en-US', {
+                        minimumFractionDigits: 6,
+                        maximumFractionDigits: 6
+                    }) : 0;
                 },
                 aggFunc: "sum",
                 cellStyle: (params) =>
@@ -323,6 +326,7 @@ function FactoryTransfer() {
             if (groupMap.has(groupKey)) {
                 const existingGroup = groupMap.get(groupKey);
                 existingGroup.Quantity += row.Quantity;
+                existingGroup.M3SP += row.M3SP;
             } else {
                 const newGroup = { ...row };
                 groupMap.set(groupKey, newGroup);
