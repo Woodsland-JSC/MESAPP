@@ -99,7 +99,7 @@ function ImportExportInventoryByStage() {
             },
             {
                 headerName: "Mã chi tiết",
-                field: "ItemName",
+                field: "ItemCode",
                 width: 180,
                 suppressHeaderMenuButton: true,
                 filter: true,
