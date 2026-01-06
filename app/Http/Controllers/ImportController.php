@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Queue;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Http;
 
+use Maatwebsite\Excel\Excel as ExcelExcel;
+use ReflectionClass;
+
 class ImportController extends Controller
 {
     public function index()
@@ -24,41 +27,56 @@ class ImportController extends Controller
 
     public function solve(Request $request)
     {
-        // try {
-        //     $data = Excel::toArray([], $request->file('file'))[0];
-        //     $filtered = array_filter($data, function ($row) {
-        //         return !empty(array_filter($row, fn($cell) => $cell !== null && $cell !== ''));
-        //     });
-        //     $factory = $request->factory;
-        //     DB::beginTransaction();
-        //     foreach ($filtered as $key => $item) {
-        //         $palletCode = $item[0];
-        //         $palletCodeOld = $item[4];
+        $jobData = DB::table('failed_jobs')->get();
 
-        //         Pallet::query()->where(
-        //             'Code', '=', $palletCode
-        //         )->where(
-        //             'factory', '=', $factory
-        //         )->update([
-        //             'old_pallet_code' => $palletCodeOld
-        //         ]);
-        //     }
-        //     DB::commit();
-        //     return redirect()->back();
-        // } catch (Exception $e) {
-        //     dd($e);
-        // }
-        $data = DB::table('failed_jobs')->get();
+        $excels = [
+            ['Mã Pallet', 'ItemCode', 'Số lượng', 'Mã lô', 'Kho đến', 'Kho đi',]
+        ];
 
-        foreach ($data as $key => $item) {
+        foreach ($jobData as $key => $item) {
             $id = $item->id;
             $payload = json_decode($item->payload, true);
 
-            if($payload['displayName'] == 'App\\Jobs\\inventorytransfer') {
+
+
+            if ($payload['displayName'] == 'App\\Jobs\\inventorytransfer') {
                 $command = unserialize($payload['data']['command']);
-                dd($command);
+
+                $ref = new ReflectionClass($command);
+                $prop = $ref->getProperty('body');
+                $prop->setAccessible(true);
+
+                $body = $prop->getValue($command);
+                // dd($body);
+
+                $excels[] = [
+                    $body['U_Pallet'],
+                    $body['StockTransferLines'][0]['ItemCode'],
+                    $body['StockTransferLines'][0]['Quantity'],
+                    $body['StockTransferLines'][0]['BatchNumbers'][0]['BatchNumber'],
+                    $body['StockTransferLines'][0]['WarehouseCode'],
+                    $body['StockTransferLines'][0]['FromWarehouseCode'],
+                ];
             }
         }
+
+        return Excel::download(
+            new class($excels) implements \Maatwebsite\Excel\Concerns\FromArray {
+                protected $data;
+
+                public function __construct($data)
+                {
+                    $this->data = $data;
+                }
+
+                public function array(): array
+                {
+                    return $this->data;
+                }
+            },
+            'Pallet-ra-lo.xlsx',
+            ExcelExcel::XLSX
+        );
     }
 
     public function import_pallet(Request $request)
