@@ -35,12 +35,12 @@ class DryingOvenController extends Controller
 
         if ($user->role == '1') {
             $pallets = Pallet::with(['details'])
-                ->whereBetween('NgayNhap', [$fromDate, $toDate])
+                ->whereBetween('created_at', [$fromDate, $toDate])
                 ->get();
         } else {
             $pallets = Pallet::with(['details'])
                 ->where('CreateBy', $user->id)
-                ->whereBetween('NgayNhap', [$fromDate, $toDate])
+                ->whereBetween('created_at', [$fromDate, $toDate])
                 ->get();
         }
 
@@ -65,7 +65,7 @@ class DryingOvenController extends Controller
             $result[] = [
                 'pallet_id' => $pallet->palletID,
                 'pallet_code' => $pallet->Code,
-                'created_date' => $pallet->NgayNhap,
+                'created_date' => $pallet->created_at,
                 'QuyCach' => $pallet->QuyCach,
                 'LyDo' => $lyDo,
                 'sum_quantity' => $sumQuantity,
