@@ -117,7 +117,7 @@ function DryingQueueReport() {
 
                 // // Tính toán
                 // khoiLuongTinhThuong = item.mass * heSoQuyDoi;
-                
+
 
                 // let pow = 2;
 
@@ -136,11 +136,11 @@ function DryingQueueReport() {
                     width: parseInt(item.CRong),
                     height: parseInt(item.CDai),
                     qty: parseInt(item.Qty_T),
-                    mass: item.Qty,
+                    mass: Number(item.Qty),
                     reason: item.LyDo,
                     status: item.status,
                     mnv: item.username,
-                    khoiLuongTinhThuong: Number(item.khoiLuongTinhThuong).toFixed(6),
+                    khoiLuongTinhThuong: Number(item.khoiLuongTinhThuong),
                     dgnc: item.dgnc,
                     quyLuong: item.quy_luong,
                     stacking_time: item.stacking_time ?? "",
@@ -280,7 +280,10 @@ function DryingQueueReport() {
             suppressHeaderMenuButton: true,
             aggFunc: "sum",
             valueFormatter: (params) => {
-                return params.value ? Number(params.value).toFixed(6).toLocaleString() : "0";
+                return params.value ? Number(params.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                }) : "0";
             },
             headerComponentParams: { displayName: "Khối lượng (m3)" },
         },
@@ -288,10 +291,15 @@ function DryingQueueReport() {
             headerName: "Khối lượng tính thưởng",
             field: "khoiLuongTinhThuong",
             width: 250,
+            aggFunc: "sum",
             suppressHeaderMenuButton: true,
             valueFormatter: (params) => {
-                return params.value ? params.value.toLocaleString() : "0";
-            }
+                return params.value ? Number(params.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                }) : "0";
+            },
+            headerComponentParams: { displayName: "Khối lượng tính thưởng" },
         },
         {
             headerName: "Đơn giá",
@@ -319,10 +327,13 @@ function DryingQueueReport() {
             width: 150,
             suppressHeaderMenuButton: true,
             valueFormatter: (params) => {
-                return params.value ? params.value.toLocaleString() : "0";
+                return params.value ? Number(params.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                }) : "0";
             },
             filter: true,
-             aggFunc: "sum",
+            aggFunc: "sum",
         },
         {
             headerName: "Quỹ lương",
@@ -330,7 +341,10 @@ function DryingQueueReport() {
             width: 150,
             suppressHeaderMenuButton: true,
             valueFormatter: (params) => {
-                return params.value ? Math.round(params.value).toLocaleString() : "0";
+                return params.value ? Number(params.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                }) : "0";
             },
             aggFunc: "sum"
         },
