@@ -29,10 +29,22 @@ class DryingOvenController extends Controller
         $fromDate = $request->input('fromDate');
         $toDate = $request->input('toDate');
 
-        $pallets = Pallet::with(['details'])
-            ->where('CreateBy', $userId)
-            ->whereBetween('NgayNhap', [$fromDate, $toDate])
-            ->get();
+        $user = Auth::user();
+
+        $pallets = [];
+
+        if ($user->role == '1') {
+            $pallets = Pallet::with(['details'])
+                ->whereBetween('NgayNhap', [$fromDate, $toDate])
+                ->get();
+        } else {
+            $pallets = Pallet::with(['details'])
+                ->where('CreateBy', $user->id)
+                ->whereBetween('NgayNhap', [$fromDate, $toDate])
+                ->get();
+        }
+
+
 
         $result = [];
 
