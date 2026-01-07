@@ -1322,14 +1322,14 @@ class VCNController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-        $toqc = "";
-        if (Auth::user()->plant == 'YS') {
-            $toqc = 'YS-QC';
-        } else if (Auth::user()->plant == 'CH') {
-            $toqc = 'CH-QC';
-        } else {
-            $toqc = 'HG-QC';
-        }
+        // $toqc = "";
+        // if (Auth::user()->plant == 'YS') {
+        //     $toqc = 'YS-QC';
+        // } else if (Auth::user()->plant == 'CH') {
+        //     $toqc = 'CH-QC';
+        // } else {
+        //     $toqc = 'HG-QC';
+        // }
         try {
             DB::beginTransaction();
             $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
@@ -1354,29 +1354,29 @@ class VCNController extends Controller
                     ]);
                     $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
                 }
-                if ($dt['RejectQty'] > 0) {
-                    $notifi = notireceiptVCN::create([
-                        'text' => 'Error information sent to QC',
-                        'FatherCode' => $dt['FatherCode'],
-                        'ItemCode' => $dt['ItemCode'],
-                        'ItemName' => $dt['ItemName'],
-                        'Quantity' => $dt['RejectQty'],
-                        'SubItemCode' => $dt['SubItemCode'] ?? null, //mã báo lỗi
-                        'SubItemName' => $dt['SubItemName'] ?? null, //tên mã báo lỗi
-                        'team' => $dt['Team'],
-                        'NextTeam' => $toqc,
-                        'CongDoan' => $dt['CongDoan'],
-                        'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
-                        'type' => 1,
-                        'openQty' => $dt['RejectQty'],
-                        'ProdType' => $dt['ProdType'],
-                        'version' => $dt['version'],
-                        'CreatedBy' => Auth::user()->id,
-                        'MaThiTruong' => $dt['MaThiTruong'] ?? null,
-                        'loinhamay' => $dt['factories']['value'] ?? null,
-                    ]);
-                    $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
-                }
+                // if ($dt['RejectQty'] > 0) {
+                //     $notifi = notireceiptVCN::create([
+                //         'text' => 'Error information sent to QC',
+                //         'FatherCode' => $dt['FatherCode'],
+                //         'ItemCode' => $dt['ItemCode'],
+                //         'ItemName' => $dt['ItemName'],
+                //         'Quantity' => $dt['RejectQty'],
+                //         'SubItemCode' => $dt['SubItemCode'] ?? null, //mã báo lỗi
+                //         'SubItemName' => $dt['SubItemName'] ?? null, //tên mã báo lỗi
+                //         'team' => $dt['Team'],
+                //         'NextTeam' => $toqc,
+                //         'CongDoan' => $dt['CongDoan'],
+                //         'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                //         'type' => 1,
+                //         'openQty' => $dt['RejectQty'],
+                //         'ProdType' => $dt['ProdType'],
+                //         'version' => $dt['version'],
+                //         'CreatedBy' => Auth::user()->id,
+                //         'MaThiTruong' => $dt['MaThiTruong'] ?? null,
+                //         'loinhamay' => $dt['factories']['value'] ?? null,
+                //     ]);
+                //     $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
+                // }
             }
 
             DB::commit();
@@ -2943,12 +2943,10 @@ class VCNController extends Controller
             // to bình thường
             $data = notireceiptVCN::where('id', $request->id)->where('confirm', 0)->first();
 
-
-
             if (!$data) {
                 throw new \Exception('Giao dịch hiện tại có thể đã được xác nhận hoặc bị xóa. Hãy load lại tổ để kiểm tra.');
             }
-            if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
+            if ($data->NextTeam != "NMTH-QC1" && $data->NextTeam != "NMVF-QC1") {
             } else {
                 return response()->json([
                     'error' => false,
