@@ -231,7 +231,7 @@ class QCController extends Controller
             ->first();
 
         if ($req->Type == 'DA') {
-            $temp =  humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->get();
+            $temp =  humidityDetails::where('PlanID', $req->PlanID)->get();
         } else {
             $temp =  DisabilityDetail::where('PlanID', $req->PlanID)->get();
         }
