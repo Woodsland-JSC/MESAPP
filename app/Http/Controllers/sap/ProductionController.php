@@ -55,39 +55,6 @@ class ProductionController extends Controller
         }
         $errorData = json_encode($request->ErrorData);
 
-        // Lấy tên tổ QC theo SAP
-        $conDB = (new ConnectController)->connect_sap();
-
-        $KHOI = $request->input('KHOI');
-        $Factory = $request->input('Factory');
-        $query = 'SELECT "ResCode" FROM "ORSC" WHERE "U_CDOAN" = ? AND "U_FAC" = ? AND "U_KHOI" = ?';
-        $stmt = odbc_prepare($conDB, $query);
-        if (!$stmt) {
-            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
-        }
-        if (!odbc_execute($stmt, ['QC', $Factory, $KHOI])) {
-            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-        }
-
-        $results = array();
-        while ($row = odbc_fetch_array($stmt)) {
-            $results[] = $row;
-        }
-        $toqc = $results[0]['ResCode'];
-
-        odbc_close($conDB);
-
-        // dd($toqc);
-
-        // $toqc = "";
-        // if (Auth::user()->plant == 'TH') {
-        //     $toqc = 'TH-QC';
-        // } else if (Auth::user()->plant == 'YS') {
-        //     $toqc = 'YS-QC';
-        // } else if (Auth::user()->plant == 'HG') {
-        //     $toqc = 'TB-QC';
-        // }
-
         try {
             DB::beginTransaction();
             $SanLuong = SanLuong::create([
@@ -140,6 +107,28 @@ class ProductionController extends Controller
                 }
             }
             if ($request->RejectQty > 0) {
+                // Lấy tên tổ QC theo SAP
+                $conDB = (new ConnectController)->connect_sap();
+
+                $KHOI = $request->input('KHOI');
+                $Factory = $request->input('Factory');
+                $query = 'SELECT "ResCode" FROM "ORSC" WHERE "U_CDOAN" = ? AND "U_FAC" = ? AND "U_KHOI" = ?';
+                $stmt = odbc_prepare($conDB, $query);
+                if (!$stmt) {
+                    throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+                }
+                if (!odbc_execute($stmt, ['QC', $Factory, $KHOI])) {
+                    throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+                }
+
+                $results = array();
+                while ($row = odbc_fetch_array($stmt)) {
+                    $results[] = $row;
+                }
+                $toqc = $results[0]['ResCode'];
+
+                odbc_close($conDB);
+                
                 $notifi = notireceipt::create([
                     'text' => 'Error information sent to QC',
                     'Quantity' => $request->RejectQty,
@@ -1097,7 +1086,7 @@ class ProductionController extends Controller
             'returnedHistory' => $dataReturn,
         ], 200);
     }
-    
+
     function collectdata($spdich, $item, $to)
     {
         $conDB = (new ConnectController)->connect_sap();
