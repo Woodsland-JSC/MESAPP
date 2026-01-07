@@ -340,10 +340,10 @@ class QCController extends Controller
                 $toQC = 'QC_TH';
                 break;
             case 'HG':
-                $toQC = 'QC_HG';
+                $toQC = 'QC_VF';
                 break;
             case 'YS':
-                $toQC = 'QC_YS(CBG)';
+                $toQC = 'QC_YS1';
                 break;
             case 'TB':
                 $toQC = 'QC_TB';
