@@ -60,7 +60,7 @@ class ProductionController extends Controller
 
         $KHOI = $request->input('KHOI');
         $Factory = $request->input('Factory');
-        $query = 'SELECT "ResName" FROM "ORSC" WHERE "U_CDOAN" = ? AND "U_FAC" = ? AND "U_KHOI" = ?';
+        $query = 'SELECT "ResCode" FROM "ORSC" WHERE "U_CDOAN" = ? AND "U_FAC" = ? AND "U_KHOI" = ?';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -73,7 +73,7 @@ class ProductionController extends Controller
         while ($row = odbc_fetch_array($stmt)) {
             $results[] = $row;
         }
-        $toqc = $results[0]['ResName'];
+        $toqc = $results[0]['ResCode'];
 
         odbc_close($conDB);
 
