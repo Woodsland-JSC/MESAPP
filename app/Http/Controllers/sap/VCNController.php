@@ -50,43 +50,6 @@ class VCNController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
 
-        // Lấy tên tổ QC theo SAP
-        $conDB = (new ConnectController)->connect_sap();
-        $query = 'SELECT "ResCode" FROM "ORSC" WHERE "U_CDOAN" = ? AND "U_FAC" = ? AND "U_KHOI" = ?';
-        $stmt = odbc_prepare($conDB, $query);
-        if (!$stmt) {
-            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
-        }
-        if (!odbc_execute($stmt, ['QC', $request->loinhamay, 'VCN'])) {
-            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-        }
-
-        $results = array();
-
-        while ($row = odbc_fetch_array($stmt)) {
-            $results[] = $row;
-        }
-
-        if (count($results) == 0) {
-            return response()->json([
-                'error' => false,
-                'status_code' => 404,
-                'message' => "Không tìm thấy tổ QC"
-            ], 404);
-        }
-
-        $toqc = $results[0]['ResCode'];
-
-        odbc_close($conDB);
-
-        if (!$toqc) {
-            return response()->json([
-                'error' => false,
-                'status_code' => 404,
-                'message' => "Không tìm thấy tổ QC"
-            ], 404);
-        }
-
         try {
             DB::beginTransaction();
             $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
@@ -124,6 +87,44 @@ class VCNController extends Controller
                 }
             }
             if ($request->RejectQty > 0) {
+
+                // Lấy tên tổ QC theo SAP
+                $conDB = (new ConnectController)->connect_sap();
+                $query = 'SELECT "ResCode" FROM "ORSC" WHERE "U_CDOAN" = ? AND "U_FAC" = ? AND "U_KHOI" = ?';
+                $stmt = odbc_prepare($conDB, $query);
+                if (!$stmt) {
+                    throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+                }
+                if (!odbc_execute($stmt, ['QC', $request->loinhamay, 'VCN'])) {
+                    throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+                }
+
+                $results = array();
+
+                while ($row = odbc_fetch_array($stmt)) {
+                    $results[] = $row;
+                }
+
+                if (count($results) == 0) {
+                    return response()->json([
+                        'error' => false,
+                        'status_code' => 404,
+                        'message' => "Không tìm thấy tổ QC"
+                    ], 404);
+                }
+
+                $toqc = $results[0]['ResCode'];
+
+                odbc_close($conDB);
+
+                if (!$toqc) {
+                    return response()->json([
+                        'error' => false,
+                        'status_code' => 404,
+                        'message' => "Không tìm thấy tổ QC"
+                    ], 404);
+                }
+                
                 $notifi = notireceiptVCN::create([
                     'LSX' => $request->LSX,
                     'text' => 'Error information sent to QC',
