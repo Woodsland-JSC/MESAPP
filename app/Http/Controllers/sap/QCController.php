@@ -1291,12 +1291,9 @@ class QCController extends Controller
                 $closed = 1;
             }
 
-            //3. Lấy giá trị kho QC
-            $warehouse = '';
-            if ($data->NextTeam == 'QC_TH' || $data->NextTeam == 'QC_YS(CBG)' || $data->NextTeam == 'QC_TB') {
-                $warehouse = $this->getQCWarehouse('CBG', 'QC', $request->Factory);
-            }
-            if ($warehouse == "-1") {
+            $warehouse = $this->getQCWarehouse('CBG', 'QC', $request->Factory);
+
+            if(!$warehouse || $warehouse == "-1") {
                 return response()->json([
                     'error' => 'Không tìm thấy kho QC',
                 ], 500);
