@@ -333,22 +333,45 @@ class QCController extends Controller
 
         // 2. Lấy tên tổ QC theo nhà máy
         $Factory = $request->input('Factory');
+        $KHOI = $request->input('KHOI');
 
-        $toQC = "";
-        switch ($Factory) {
-            case 'TH':
-                $toQC = 'QC_TH';
-                break;
-            case 'HG':
-                $toQC = 'QC_VF';
-                break;
-            case 'YS':
-                $toQC = 'QC_YS1';
-                break;
-            case 'TB':
-                $toQC = 'QC_TB';
-                break;
-        };
+        // Lấy tên tổ QC theo SAP
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'SELECT "ResCode" FROM "ORSC" WHERE "U_CDOAN" = ? AND "U_FAC" = ? AND "U_KHOI" = ?';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, ['QC', $Factory, $KHOI])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $results = array();
+
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+
+        if (count($results) == 0) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 404,
+                'message' => "Không tìm thấy tổ QC"
+            ], 404);
+        }
+
+        $toqc = $results[0]['ResCode'];
+
+        odbc_close($conDB);
+
+        if (!$toqc) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 404,
+                'message' => "Không tìm thấy tổ QC"
+            ], 404);
+        }
 
         // 3. Danh sách lỗi chờ xử lý
         $data = DB::table('sanluong as a')
@@ -388,7 +411,7 @@ class QCController extends Controller
             )
             ->where('b.confirm', '=', 0)
             ->where('b.type', 1)
-            ->where('b.team', '=',  $toQC)
+            ->where('b.team', '=',  $toqc)
             ->where('a.Team', '=',  $request->TO)
             ->havingRaw('Quantity > 0')
             ->get();
