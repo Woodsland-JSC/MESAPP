@@ -1191,7 +1191,7 @@ class ProductionController extends Controller
                 throw new \Exception('data không hợp lệ.');
             }
 
-            if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
+            if ($data->NextTeam != "NMTH-QC1"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "NMVF-QC1") {
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
                 $allocates = $this->allocate($dataallocate, $data->CompleQty);
                 if (count($allocates) == 0) {
