@@ -2833,14 +2833,7 @@ class VCNController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-        $toqc = "";
-        if (Auth::user()->plant == 'TH') {
-            $toqc = 'TH-QC';
-        } else if (Auth::user()->plant == 'YS') {
-            $toqc = 'YS1-QC';
-        } else {
-            $toqc = 'HG-QC';
-        }
+
         try {
             DB::beginTransaction();
 
@@ -2894,29 +2887,29 @@ class VCNController extends Controller
                         'CDai' => $dt['CDai']
                     ]);
                 }
-                if ($dt['RejectQty'] > 0) {
-                    $noti = notireceiptVCN::create([
-                        'LSX' => $request->LSX,
-                        'text' => 'Error information sent to QC',
-                        'MaThiTruong' => $request->MaThiTruong ?? null,
-                        'FatherCode' => $request->SubItemCode,
-                        'ItemCode' => $dt['ItemCode'],
-                        'ItemName' => $dt['ItemName'],
-                        'team' => $request->team,
-                        'Quantity' => $dt['RejectQty'],
-                        'NextTeam' => $request->NextTeam,
-                        'CongDoan' => $request->CongDoan,
-                        'type' => 1,
-                        'openQty' => 0,
-                        'ProdType' => $request->ProdType,
-                        'version' => $request->version,
-                        'isRONG' => true,
-                        'QtyIssueRong' => $request->QtyIssue,
-                        'CreatedBy' => Auth::user()->id,
-                        'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
-                        'disassembly_order_id' => $newOrder->id,
-                    ]);
-                }
+                // if ($dt['RejectQty'] > 0) {
+                //     $noti = notireceiptVCN::create([
+                //         'LSX' => $request->LSX,
+                //         'text' => 'Error information sent to QC',
+                //         'MaThiTruong' => $request->MaThiTruong ?? null,
+                //         'FatherCode' => $request->SubItemCode,
+                //         'ItemCode' => $dt['ItemCode'],
+                //         'ItemName' => $dt['ItemName'],
+                //         'team' => $request->team,
+                //         'Quantity' => $dt['RejectQty'],
+                //         'NextTeam' => $request->NextTeam,
+                //         'CongDoan' => $request->CongDoan,
+                //         'type' => 1,
+                //         'openQty' => 0,
+                //         'ProdType' => $request->ProdType,
+                //         'version' => $request->version,
+                //         'isRONG' => true,
+                //         'QtyIssueRong' => $request->QtyIssue,
+                //         'CreatedBy' => Auth::user()->id,
+                //         'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                //         'disassembly_order_id' => $newOrder->id,
+                //     ]);
+                // }
             }
 
             DB::commit();
