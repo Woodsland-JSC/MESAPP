@@ -204,6 +204,7 @@ function HumidityCheck(props) {
     };
 
     useEffect(() => {
+        loadHumidRecordList();
         loadCurrentHumidRecords();
     }, []);
 
