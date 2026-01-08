@@ -157,11 +157,13 @@ class VcnController extends Controller
             // Tính số lượng tối đa
             $maxQuantities = [];
             foreach ($groupedResults as $result) {
-                $onHand = $result['OnHand'];
-                $baseQty = $result['BaseQty'];
+                if ($result['IssueType'] == 'B') {
+                    $onHand = $result['OnHand'];
+                    $baseQty = $result['BaseQty'];
 
-                $maxQuantity = $baseQty ? floor($onHand / $baseQty) : 0;
-                $maxQuantities[] = $maxQuantity;
+                    $maxQuantity = $baseQty ? floor($onHand / $baseQty) : 0;
+                    $maxQuantities[] = $maxQuantity;
+                }
             }
 
             $maxQty = !empty($maxQuantities) ? min($maxQuantities) : 0;
