@@ -75,6 +75,7 @@ class VcnController extends Controller
                         'SubItemName' => $subItemName,
                         'OnHand' => 0,
                         'BaseQty' => $baseQty,
+                        'IssueType' => $result['IssueType']
                     ];
                 }
 
