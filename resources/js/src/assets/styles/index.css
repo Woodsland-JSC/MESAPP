@@ -608,3 +608,15 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 .swal2-cancel:hover {
   background-color: #6b7280 !important;
 }
+
+.chakra-wl-confirm-btn{
+    background-color: #17506B !important;
+    color:#FFFFFF !important;
+    
+}
+
+.chakra-wl-confirm-btn:hover{
+    background-color: #17506B !important;
+    color:#FFFFFF !important;
+    
+}
