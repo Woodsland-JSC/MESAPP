@@ -166,6 +166,16 @@ class VcnController extends Controller
                 }
             }
 
+            if (count($maxQuantities) == 0 && count($groupedResults) > 0) {
+                foreach ($groupedResults as $result) {
+                    $onHand = $result['OnHand'];
+                    $baseQty = $result['BaseQty'];
+
+                    $maxQuantity = $baseQty ? floor($onHand / $baseQty) : 0;
+                    $maxQuantities[] = $maxQuantity;
+                }
+            }
+
             $maxQty = !empty($maxQuantities) ? min($maxQuantities) : 0;
 
             // Tính tống số lượng chờ xác nhận và chờ xử lý lỗi
