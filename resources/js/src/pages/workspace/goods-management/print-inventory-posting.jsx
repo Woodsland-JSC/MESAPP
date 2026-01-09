@@ -407,7 +407,7 @@ const PrintInventoryPosting = () => {
                             }}>
                                 Hủy
                             </Button>
-                            <Button bg="#155979" color={"#FFFFFF"} _hover={{ bg: "#155979" }} onClick={handleSave} ml={3}>
+                            <Button onClick={handleSave} ml={3} className="chakra-wl-confirm-btn">
                                 Xác nhận
                             </Button>
                         </AlertDialogFooter>
