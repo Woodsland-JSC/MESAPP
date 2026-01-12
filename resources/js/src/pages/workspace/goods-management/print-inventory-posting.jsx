@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Layout from "../../../layouts/layout";
 import { FaArrowLeft, FaArrowUpRightFromSquare, FaFilePen } from "react-icons/fa6";
-import { IoIosArrowBack, IoMdArrowRoundBack } from "react-icons/io";
+import { IoIosArrowBack, IoMdArrowRoundBack, IoIosEye } from "react-icons/io";
 import { danhSachNhaMayCBG, getWhHTCBG } from "../../../api/MasterDataApi";
 import toast from "react-hot-toast";
 import useAppContext from "../../../store/AppContext";
@@ -25,6 +25,7 @@ import {
     Input
 } from "@chakra-ui/react";
 import { inventoryPostingItems } from "../../../api/inventory-posting.api";
+import Swal from "sweetalert2";
 
 const PrintInventoryPosting = () => {
     const { user } = useAppContext();
@@ -145,6 +146,49 @@ const PrintInventoryPosting = () => {
         }
     }
 
+    const handleSaveItem = async () => {
+        if(!rowSelected){ return }
+        Swal.fire({
+            title: "Xác nhận cập nhật",
+            text: "Xác nhận cập nhật số lượng tồn thực tế cho vật tư này?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Xác nhận",
+            cancelButtonText: "Hủy",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const rows = [];
+
+                rows.push({ ...rowSelected });
+
+                if (rows.length == 0) {
+                    toast.error("Chưa có dữ liệu.");
+                    return
+                }
+
+                try {
+                    setIsLoading(true);
+                    await inventoryPostingItems({
+                        data: rows,
+                        whCode: warehouse.value
+                    });
+
+                    getItems();
+                    clearData();
+                    onClose();
+                    setIsLoading(false);
+                    onCloseItem();
+                    setRowSelected(null);
+
+                    toast.success("Điều chỉnh tồn thành công.");
+                } catch (error) {
+                    toast.error("Điều chỉnh tồn có lỗi.");
+                    setIsLoading(false);
+                }
+            }
+        });
+    }
+
     const clearData = () => {
         setData([]);
     }
@@ -152,16 +196,17 @@ const PrintInventoryPosting = () => {
     const colDefs = useMemo(() => {
         return [
             {
-                headerName: "Mã sản phẩm",
+                headerName: "Codebars",
                 field: "CodeBars",
                 filter: true,
                 width: 300,
-                onCellClicked: (params) => {
-                    if (params.data) {
-                        setRowSelected(params);
-                        onOpenItem();
-                    }
-                },
+                pinned: 'left',
+            },
+            {
+                headerName: "Mã sản phẩm",
+                field: "ItemCode",
+                filter: true,
+                width: 300,
                 pinned: 'left',
             },
             {
@@ -285,10 +330,8 @@ const PrintInventoryPosting = () => {
                     {
                         items.length > 0 ? (
                             <>
-                                <div className="">
-                                    <div className="block md:hidden">
-                                        <Input bg={"#FFFFFF"} borderColor={"gray.300"} placeholder="Nhập mã ..." onChange={e => setSearchBarCode(e.target.value)} />
-                                    </div>
+                                <div className="hidden md:block">
+
                                     <div
                                         className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2"
                                         style={{
@@ -309,6 +352,46 @@ const PrintInventoryPosting = () => {
                                             localeText={AG_GRID_LOCALE_VI}
                                             onGridReady={onGridReady}
                                         />
+                                    </div>
+                                </div>
+
+                                <div className="block md:hidden">
+                                    <div className="">
+                                        <Input bg={"#FFFFFF"} borderColor={"gray.300"} placeholder="Tìm theo mã, tên sản phẩm ..." onChange={e => setSearchBarCode(e.target.value)} />
+                                        <div className="mt-3">
+                                            {
+                                                items.filter(i => i.CodeBars.includes(searchBarCode) || i.ItemName.includes(searchBarCode) || i.ItemCode.includes(searchBarCode)).map((item, index) => (
+                                                    <div class="relative bg-[#F9FAFB] border-2 border-[#76929e] rounded-xl w-[100%] mb-2" key={index} >
+                                                        <div class="absolute -top-1 -right-2.5 bg-gray-800 text-white w-7 h-7 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 transition-all hidden">
+                                                            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" class="text-white " height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M400 145.49L366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49z"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <div class="flex-col justify-center font-semibold p-4 py-3 border-b border-gray-200 bg-[#d6e4eb] w-full h-[80px] rounded-t-xl">
+                                                            <div class="text-md mb-1">{item.ItemName}</div>
+                                                            <div class="w-full flex items-center">
+                                                                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" class="text-[#17506B] w-2 h-2 mr-2" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M256 23.05C127.5 23.05 23.05 127.5 23.05 256S127.5 488.9 256 488.9 488.9 384.5 488.9 256 384.5 23.05 256 23.05z"></path>
+                                                                </svg>
+                                                                <span class="w-full">{item.ItemCode}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-gray-600 space-y-1 py-3 p-4 text-sm">
+                                                            <div class="">SL: {Number(item.OnHand)} ({item.IUoMEntry} {item.UomCode})</div>
+                                                            <div class="">Mã: {item.CodeBars}</div>
+                                                        </div>
+                                                        <div className="border border-t">
+                                                            <button onClick={() => {
+                                                                setRowSelected(item);
+                                                                onOpenItem();
+                                                            }} type="button" class="flex items-center justify-center font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center gap-x-2 ">
+                                                                Cập nhật
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            }
+                                        </div>
                                     </div>
                                 </div>
                             </>
@@ -371,7 +454,7 @@ const PrintInventoryPosting = () => {
                 <AlertDialogOverlay>
                     <AlertDialogContent>
                         <AlertDialogHeader fontSize='md' fontWeight='bold'>
-                            Xác nhận kiểm kê cho mã {rowSelected.data.CodeBars}
+                            Xác nhận kiểm kê cho mã {rowSelected.CodeBars}
                         </AlertDialogHeader>
 
                         <AlertDialogBody>
@@ -379,7 +462,7 @@ const PrintInventoryPosting = () => {
                                 <span>Tồn trong kho</span>
                                 <NumberInput
                                     className="bg-gray-100"
-                                    value={Number(rowSelected.data.OnHand)}
+                                    value={Number(rowSelected.OnHand)}
                                     isReadOnly={true}
                                 >
                                     <NumberInputField />
@@ -391,7 +474,7 @@ const PrintInventoryPosting = () => {
                                     min={0}
                                     className=""
                                     onChange={value => {
-                                        rowSelected.node.setDataValue("quantity", value);
+                                        setRowSelected({ ...rowSelected, quantity: value });
                                     }}
                                 >
                                     <NumberInputField />
@@ -407,7 +490,7 @@ const PrintInventoryPosting = () => {
                             }}>
                                 Hủy
                             </Button>
-                            <Button onClick={handleSave} ml={3} className="chakra-wl-confirm-btn">
+                            <Button onClick={handleSaveItem} ml={3} className="chakra-wl-confirm-btn">
                                 Xác nhận
                             </Button>
                         </AlertDialogFooter>
