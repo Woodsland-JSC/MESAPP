@@ -908,8 +908,7 @@ function Workspace() {
                                     </Box>
 
                                     <Box className="mb-3" >
-                                        <SimpleGrid columns={3} spacing={4}>
-
+                                        <SimpleGrid columns={{ base: 1, md: 3, lg: 3 }} spacing={4}>
                                             <Box>
                                                 <Text className="font-semibold">
                                                     Chiều dày
