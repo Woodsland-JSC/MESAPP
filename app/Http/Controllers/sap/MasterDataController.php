@@ -840,19 +840,15 @@ class MasterDataController extends Controller
     {
         try {
             $query = <<<SQL
-                SELECT DISTINCT A."DocDate" FROM IBT1 A
+                SELECT A."InDate" FROM OIBT A 
                 JOIN OWHS B ON A."WhsCode" = B."WhsCode"
-                JOIN OIBT C ON A."WhsCode" = C."WhsCode" AND A."ItemCode" = C."ItemCode"
-                WHERE B."U_Flag" IN (?) 
+                WHERE A."BatchNum" LIKE ? 
+                and A."ItemCode" = ?
+                AND B."U_Flag" IN (?)
+                AND A."Quantity" > 0
                 AND B."BPLid" = ?
                 AND B."U_FAC" = ?
-                AND A."ItemCode" = ?
-                AND A."Direction"= 0
-                AND A."BatchNum" LIKE ?
-                AND B."U_KHOI" = 'CBG'
-                AND A."DocDate" >= '2025-11-01 00:00:00'
-                AND C."Quantity" > 0
-                order by A."DocDate" desc;
+                ORDER BY A."InDate" DESC;
             SQL;
 
             $flag = 'TS';
@@ -865,7 +861,7 @@ class MasterDataController extends Controller
             $itemCode = $request->query('itemCode');
             $batch = $request->query('batch');
 
-            $data = $hanaService->select($query, [$flag, $branch, $plant, $itemCode, $batch . '%']);
+            $data = $hanaService->select($query, [$batch . '%', $itemCode, $flag, $branch, $plant]);
 
             return $data;
         } catch (Exception $e) {
