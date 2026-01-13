@@ -452,11 +452,7 @@ function WoodSorting() {
                 const batch = selectedDryingMethod.batchNum + '_' + ymd;
 
                 let find = BatchNums.find(item => item.BatchNum == batch);
-                console.log("batch", batch);
-                console.log("BatchNums", BatchNums);
-                console.log("BatchNums", BatchNums.filter(item => item.BatchNum == batch));
-
-
+                
                 const response = await palletsApi.getStockByItem(
                     // selectedDryingMethod.code,
                     inDate.itemCode,
