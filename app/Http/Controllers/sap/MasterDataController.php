@@ -840,7 +840,7 @@ class MasterDataController extends Controller
     {
         try {
             $query = <<<SQL
-                SELECT A."InDate" as "DocDate" FROM OIBT A 
+                SELECT A."InDate" as "DocDate",  A."ItemCode" FROM OIBT A 
                 JOIN OWHS B ON A."WhsCode" = B."WhsCode"
                 WHERE A."BatchNum" LIKE ? 
                 -- and A."ItemCode" = ?
