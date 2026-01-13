@@ -147,7 +147,7 @@ const PrintInventoryPosting = () => {
     }
 
     const handleSaveItem = async () => {
-        if(!rowSelected){ return }
+        if (!rowSelected) { return }
         Swal.fire({
             title: "Xác nhận cập nhật",
             text: "Xác nhận cập nhật số lượng tồn thực tế cho vật tư này?",
@@ -360,40 +360,43 @@ const PrintInventoryPosting = () => {
                                         <Input bg={"#FFFFFF"} borderColor={"gray.300"} placeholder="Tìm theo mã, tên sản phẩm ..." onChange={e => setSearchBarCode(e.target.value)} />
                                         <div className="mt-3">
                                             {
-                                                items.filter(i => 
-                                                        i.CodeBars?.toLowerCase().includes(searchBarCode?.toLowerCase()) || 
-                                                        i.ItemName?.toLowerCase().includes(searchBarCode?.toLowerCase()) || 
-                                                        i.ItemCode?.toLowerCase().includes(searchBarCode?.toLowerCase()))
-                                                    .map((item, index) => (
-                                                    <div className="relative bg-[#F9FAFB] border-2 border-[#76929e] rounded-xl w-[100%] mb-2" key={index} >
-                                                        <div className="absolute -top-1 -right-2.5 bg-gray-800 text-white w-7 h-7 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 transition-all hidden">
-                                                            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="text-white " height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                                                                <path d="M400 145.49L366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49z"></path>
-                                                            </svg>
-                                                        </div>
-                                                        <div className="flex-col justify-center font-semibold p-4 py-3 border-b border-gray-200 bg-[#d6e4eb] w-full h-[80px] rounded-t-xl">
-                                                            <div className="text-md mb-1">{item.ItemName}</div>
-                                                            <div className="w-full flex items-center">
-                                                                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="text-[#17506B] w-2 h-2 mr-2" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M256 23.05C127.5 23.05 23.05 127.5 23.05 256S127.5 488.9 256 488.9 488.9 384.5 488.9 256 384.5 23.05 256 23.05z"></path>
+                                                items.filter(i => {
+                                                    if (!searchBarCode) return i;
+                                                    if(
+                                                        i.CodeBars && i.CodeBars?.toLowerCase().includes(searchBarCode?.toLowerCase()) ||
+                                                        i.ItemName && i.ItemName?.toLowerCase().includes(searchBarCode?.toLowerCase()) ||
+                                                        i.ItemCode && i.ItemCode?.toLowerCase().includes(searchBarCode?.toLowerCase())
+                                                    ) return i;
+                                                }).map((item, index) => (
+                                                        <div className="relative bg-[#F9FAFB] border-2 border-[#76929e] rounded-xl w-[100%] mb-2" key={index} >
+                                                            <div className="absolute -top-1 -right-2.5 bg-gray-800 text-white w-7 h-7 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 transition-all hidden">
+                                                                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="text-white " height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M400 145.49L366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49z"></path>
                                                                 </svg>
-                                                                <span className="w-full">{item.ItemCode}</span>
+                                                            </div>
+                                                            <div className="flex-col justify-center font-semibold p-4 py-3 border-b border-gray-200 bg-[#d6e4eb] w-full h-[80px] rounded-t-xl">
+                                                                <div className="text-md mb-1">{item.ItemName}</div>
+                                                                <div className="w-full flex items-center">
+                                                                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="text-[#17506B] w-2 h-2 mr-2" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                                        <path d="M256 23.05C127.5 23.05 23.05 127.5 23.05 256S127.5 488.9 256 488.9 488.9 384.5 488.9 256 384.5 23.05 256 23.05z"></path>
+                                                                    </svg>
+                                                                    <span className="w-full">{item.ItemCode}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="text-gray-600 space-y-1 py-3 p-4 text-sm">
+                                                                <div className="">SL: {Number(item.OnHand)} ({item.IUoMEntry} {item.UomCode})</div>
+                                                                <div className="">Mã: {item?.CodeBars}</div>
+                                                            </div>
+                                                            <div className="border border-t">
+                                                                <button onClick={() => {
+                                                                    setRowSelected(item);
+                                                                    onOpenItem();
+                                                                }} type="button" className="flex items-center justify-center font-medium rounded-xl  w-full px-5 py-2.5 text-center gap-x-2 ">
+                                                                    Cập nhật
+                                                                </button>
                                                             </div>
                                                         </div>
-                                                        <div className="text-gray-600 space-y-1 py-3 p-4 text-sm">
-                                                            <div className="">SL: {Number(item.OnHand)} ({item.IUoMEntry} {item.UomCode})</div>
-                                                            <div className="">Mã: {item.CodeBars}</div>
-                                                        </div>
-                                                        <div className="border border-t">
-                                                            <button onClick={() => {
-                                                                setRowSelected(item);
-                                                                onOpenItem();
-                                                            }} type="button" className="flex items-center justify-center font-medium rounded-xl  w-full px-5 py-2.5 text-center gap-x-2 ">
-                                                                Cập nhật
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))
+                                                    ))
                                             }
                                         </div>
                                     </div>
