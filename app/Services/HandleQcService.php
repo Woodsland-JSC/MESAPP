@@ -337,11 +337,7 @@ class HandleQcService
             $responseInventoryGenEntry = $resInventoryGenEntry->json();
 
             if (!$statusInventoryGenEntry) {
-                if ($exit != null) {
-                    $this->SapB1Service->cancelInventoryGenExits($exit['DocEntry']);
-                }
-
-                Log::info("HandleQcService::baoLoiSayAm - Entry Error: " . json_encode($responseInventoryGenExits));
+                Log::info("HandleQcService::baoLoiSayAm - Entry Error: " . json_encode($responseInventoryGenEntry));
 
                 return response()->json([
                     'message' => $responseInventoryGenEntry['error'] ? $responseInventoryGenEntry['error']['message']['value'] : "Nhập kho " . $whSL['WhsCode'] . " có lỗi"
@@ -375,17 +371,7 @@ class HandleQcService
             ], 200);
         } catch (Exception $e) {
             Log::info("HandleQcService::baoLoiSayAm - " . $e->getMessage());
-
-            if ($entry != null) {
-                $this->SapB1Service->cancelInventoryGenEntries($entry['DocEntry']);
-            }
-
-            if ($exit != null) {
-                $this->SapB1Service->cancelInventoryGenExits($exit['DocEntry']);
-            }
-
             DB::rollBack();
-
             return response()->json([
                 'message' => 'Xử lý báo lỗi sấy ẩm có lỗi.'
             ], 500);

@@ -132,7 +132,7 @@ class SapB1Service
                 'Accept' => 'application/json',
                 'Authorization' => 'Basic ' . BasicAuthToken(),
             ])->patch($url, [
-                "Cancel" => "tYES"
+                "Cancelled" => "tYES"
             ]);
 
             return $response->json();
@@ -153,7 +153,7 @@ class SapB1Service
                 'Accept' => 'application/json',
                 'Authorization' => 'Basic ' . BasicAuthToken(),
             ])->patch($url, [
-                "Cancel" => "tYES"
+                "Cancelled" => "tYES"
             ]);
 
             return $response->json();
