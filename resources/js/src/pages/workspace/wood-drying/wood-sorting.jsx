@@ -459,7 +459,7 @@ function WoodSorting() {
 
                 const response = await palletsApi.getStockByItem(
                     // selectedDryingMethod.code,
-                    inDate.ItemCode,
+                    inDate.itemCode,
                     selectedDryingReason.value,
                     find ? batch : selectedDryingMethod.batchNum
                 );
@@ -516,7 +516,7 @@ function WoodSorting() {
                         const newPalletCard = (
                             <PalletCard
                                 key={item.WhsCode + item.BatchNum}
-                                itemCode={selectedDryingMethod.code}
+                                itemCode={inDate.itemCode}
                                 itemName={selectedDryingMethod.label}
                                 batchNum={item.BatchNum}
                                 inStock={item.Quantity}
