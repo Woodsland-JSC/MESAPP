@@ -282,6 +282,7 @@ class HandleQcService
                         "ItemCode"      => $itemFind['ItemCode'],
                         "Quantity"      => (float) $m3,
                         "WarehouseCode" => $warehouse,
+                        "CostingCode4" => "Default",
                         "BatchNumbers" => [
                             [
                                 "Quantity" => (float) $m3,
@@ -298,6 +299,7 @@ class HandleQcService
             $responseInventoryGenExits = $resInventoryGenExits->json();
 
             if (!$statusInventoryGenExits) {
+                Log::info("HandleQcService::baoLoiSayAm - Exit Error: " . json_encode($responseInventoryGenExits));
                 return response()->json([
                     'message' => $responseInventoryGenExits['error'] ? $responseInventoryGenExits['error']['message']['value'] : "Xuất kho " . $warehouse . " có lỗi"
                 ], 500);
@@ -315,6 +317,7 @@ class HandleQcService
                         "ItemCode"      => ($dai || $dai != 0) ? $itemFind['ItemCode'] : $sitteItemCode,
                         "Quantity"      => $m3,
                         "WarehouseCode" => $whSL['WhsCode'],
+                        "CostingCode4" => "Default",
                         "BatchNumbers" => [
                             [
                                 "Quantity" => $m3,
@@ -337,6 +340,8 @@ class HandleQcService
                 if ($exit != null) {
                     $this->SapB1Service->cancelInventoryGenExits($exit['DocEntry']);
                 }
+
+                Log::info("HandleQcService::baoLoiSayAm - Entry Error: " . json_encode($responseInventoryGenExits));
 
                 return response()->json([
                     'message' => $responseInventoryGenEntry['error'] ? $responseInventoryGenEntry['error']['message']['value'] : "Nhập kho " . $whSL['WhsCode'] . " có lỗi"
