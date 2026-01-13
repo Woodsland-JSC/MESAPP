@@ -342,7 +342,7 @@ const PrintInventoryPosting = () => {
                                     >
                                         <AgGridReact
                                             ref={gridRef}
-                                            rowData={items.filter(i => i.CodeBars.includes(searchBarCode))}
+                                            rowData={items}
                                             columnDefs={colDefs}
                                             groupDisplayType={"multipleColumns"}
                                             getRowStyle={(params) => {
@@ -363,9 +363,9 @@ const PrintInventoryPosting = () => {
                                                 items.filter(i => {
                                                     if (!searchBarCode) return i;
                                                     if(
-                                                        i.CodeBars && i.CodeBars?.toLowerCase().includes(searchBarCode?.toLowerCase()) ||
-                                                        i.ItemName && i.ItemName?.toLowerCase().includes(searchBarCode?.toLowerCase()) ||
-                                                        i.ItemCode && i.ItemCode?.toLowerCase().includes(searchBarCode?.toLowerCase())
+                                                        i?.CodeBars && i?.CodeBars?.toLowerCase().includes(searchBarCode?.toLowerCase()) ||
+                                                        i?.ItemName && i?.ItemName?.toLowerCase().includes(searchBarCode?.toLowerCase()) ||
+                                                        i?.ItemCode && i?.ItemCode?.toLowerCase().includes(searchBarCode?.toLowerCase())
                                                     ) return i;
                                                 }).map((item, index) => (
                                                         <div className="relative bg-[#F9FAFB] border-2 border-[#76929e] rounded-xl w-[100%] mb-2" key={index} >
