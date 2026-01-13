@@ -27,7 +27,7 @@ class OITWService
         JOIN OITM B ON A."ItemCode" = B."ItemCode"
         JOIN OUOM C ON B."IUoMEntry" = C."UomEntry"
         JOIN OWHS D ON D."WhsCode" =  A."WhsCode"
-        WHERE A."WhsCode" = ? AND A."OnHand" > 0 AND A."ItemCode" LIKE 'SU%';
+        WHERE A."WhsCode" = ? AND B."U_Group1" = 'HC' AND A."ItemCode" LIKE 'SU%';
     SQL;
 
     private $SQL_GET_ITEMS_SF_BY_WH = <<<SQL
