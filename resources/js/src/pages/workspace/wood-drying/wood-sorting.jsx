@@ -304,7 +304,8 @@ function WoodSorting() {
             res.forEach(item => {
                 data.push({
                     value: moment(item.DocDate).format('yyyy-MM-DD'),
-                    label: moment(item.DocDate).format('DD-MM-yyyy')
+                    label: moment(item.DocDate).format('DD-MM-yyyy'),
+                    itemCode: item.ItemCode
                 })
             })
 
@@ -457,7 +458,8 @@ function WoodSorting() {
 
 
                 const response = await palletsApi.getStockByItem(
-                    selectedDryingMethod.code,
+                    // selectedDryingMethod.code,
+                    inDate.ItemCode,
                     selectedDryingReason.value,
                     find ? batch : selectedDryingMethod.batchNum
                 );
