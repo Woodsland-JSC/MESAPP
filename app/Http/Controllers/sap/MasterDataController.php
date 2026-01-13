@@ -843,7 +843,7 @@ class MasterDataController extends Controller
                 SELECT A."InDate" as "DocDate" FROM OIBT A 
                 JOIN OWHS B ON A."WhsCode" = B."WhsCode"
                 WHERE A."BatchNum" LIKE ? 
-                and A."ItemCode" = ?
+                -- and A."ItemCode" = ?
                 AND B."U_Flag" IN (?)
                 AND A."Quantity" > 0
                 AND B."BPLid" = ?
@@ -861,7 +861,7 @@ class MasterDataController extends Controller
             $itemCode = $request->query('itemCode');
             $batch = $request->query('batch');
 
-            $data = $hanaService->select($query, [$batch . '%', $itemCode, $flag, $branch, $plant]);
+            $data = $hanaService->select($query, [$batch . '%', $flag, $branch, $plant]);
 
             return $data;
         } catch (Exception $e) {
