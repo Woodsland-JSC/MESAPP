@@ -4,6 +4,7 @@ namespace App\Http\Controllers\sap_controller;
 
 use App\Http\Controllers\Controller;
 use App\Services\SapB1Service;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -38,7 +39,7 @@ class InventoryPostingController extends Controller
             $today = date("ymd");
 
             $postingData = [
-                "PostingDate" => "2025-12-04",
+                "PostingDate" => Carbon::now()->format('Y-m-d'),
                 "Remarks" => "Kiểm kê kho " . $whCode . " " .  $today,
                 "InventoryPostingLines" => [],
                 "BranchID" => Auth::user()->branch

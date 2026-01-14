@@ -27,15 +27,17 @@ class OITWService
         JOIN OITM B ON A."ItemCode" = B."ItemCode"
         JOIN OUOM C ON B."IUoMEntry" = C."UomEntry"
         JOIN OWHS D ON D."WhsCode" =  A."WhsCode"
-        WHERE A."WhsCode" = ? AND B."U_Group1" = 'HC' AND A."ItemCode" LIKE 'SU%';
+        WHERE A."WhsCode" = ? AND B."U_Group1" = 'HC' AND A."ItemCode" LIKE 'SU%' 
+        ORDER BY B."CodeBars" DESC;
     SQL;
 
     private $SQL_GET_ITEMS_SF_BY_WH = <<<SQL
-        SELECT A."ItemCode", B."ItemName", A."WhsCode", A."OnHand", B."IUoMEntry", C."UomCode", D."BPLid" FROM OITW A
+        SELECT A."ItemCode", B."ItemName", A."WhsCode", A."OnHand", B."IUoMEntry", C."UomCode", D."BPLid", B."CodeBars" FROM OITW A
         JOIN OITM B ON A."ItemCode" = B."ItemCode"
         JOIN OUOM C ON B."IUoMEntry" = C."UomEntry"
         JOIN OWHS D ON D."WhsCode" =  A."WhsCode"
         WHERE A."WhsCode" = ? AND A."OnHand" > 0 AND A."ItemCode" LIKE 'SF%'
+        ORDER BY B."CodeBars" DESC;
     SQL;
 
     public function __construct(HanaService $hanaService)
