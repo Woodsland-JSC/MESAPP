@@ -145,3 +145,14 @@ export const HXL_QC_DATA = [
         name: 'Cắt hạ'
     }
 ];
+
+export const WOOD_DRYING_SORTING_METHOD = [
+    {
+        value: 1,
+        label: "Xếp sấy thủ công"
+    },
+    {
+        value: 2,
+        label: "Xếp sấy máy"
+    }
+]
