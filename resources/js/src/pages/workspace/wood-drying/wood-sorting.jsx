@@ -43,6 +43,7 @@ import { FaRotateLeft } from "react-icons/fa6";
 import { HiViewColumns } from "react-icons/hi2";
 import { FaCheck, FaCircle } from "react-icons/fa";
 import { getIndatesByItem } from "../../../api/MasterDataApi";
+import { WOOD_DRYING_SORTING_METHOD } from "../../../shared/data";
 
 function WoodSorting() {
     const { user } = useAppContext();
@@ -210,6 +211,7 @@ function WoodSorting() {
     const [selectedDryingMethod, setSelectedDryingMethod] = useState(null);
     const [selectedBatchInfo, setSelectedBatchInfo] = useState(null);
     const [selectedEmployee, setSelectedEmployee] = useState(false);
+    const [selectedSortingMethod, setSelectedSortingMethod] = useState(WOOD_DRYING_SORTING_METHOD[0]);
 
     const [palletCards, setPalletCards] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -624,6 +626,7 @@ function WoodSorting() {
             MaNhaMay: user?.plant,
             stackingTime: stackingTime,
             employee: selectedEmployee.value,
+            sortingMethod: selectedSortingMethod.value,
             Details: palletCards.map((card) => ({
                 ItemCode: card.props.itemCode,
                 ItemName: card.props.itemName,
@@ -723,6 +726,7 @@ function WoodSorting() {
                 if (dryingMethodSelectRef) {
                     dryingMethodSelectRef.clearValue();
                 }
+                
                 setInDate(null);
                 setCreatePalletLoading(false);
                 setQuyCachList([]);
@@ -732,6 +736,7 @@ function WoodSorting() {
                 setPalletCards([]);
                 setPalletQuantities({});
                 getEmployee();
+                setSelectedSortingMethod(WOOD_DRYING_SORTING_METHOD[0]);
             }
         } catch (error) {
             console.error("Error creating pallet:", error);
@@ -1869,7 +1874,7 @@ function WoodSorting() {
                                             className=" border border-gray-300 text-gray-900 pl-3 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
                                         />
                                     </div>
-                                    <div className="col-span-2">
+                                    <div className="col-span-1">
                                         <label
                                             htmlFor="drying_reason"
                                             className="block mb-1 text-md font-medium text-gray-900 "
@@ -1886,6 +1891,27 @@ function WoodSorting() {
                                                 setSelectedEmployee(value);
                                             }}
                                             isDisabled={palletCards.length > 0}
+                                        />
+                                    </div>
+
+                                    <div className="col-span-1">
+                                        <label
+                                            htmlFor="drying_reason"
+                                            className="block mb-1 text-md font-medium text-gray-900 "
+                                        >
+                                            Phương thức xếp sấy{" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </label>
+                                        <Select
+                                            placeholder="Chọn phương thức xếp sấy"
+                                            options={WOOD_DRYING_SORTING_METHOD}
+                                            onChange={(value) => {
+                                                setSelectedSortingMethod(value);
+                                            }}
+                                            isDisabled={palletCards.length > 0}
+                                            value={selectedSortingMethod}
                                         />
                                     </div>
                                 </div>

@@ -273,7 +273,7 @@ class DryingOvenController extends Controller
             $current_year = now()->year;
             $isoYear = date('o');
 
-            $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay', 'stackingTime', 'employee']);
+            $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay', 'stackingTime', 'employee', 'sortingMethod']);
             foreach ($palletData as $key => $value) {
                 if (is_array($value)) {
                     $palletData[$key] = is_array($value) ? implode(',', $value) : $value;
@@ -320,6 +320,7 @@ class DryingOvenController extends Controller
                 'QuyCach' => $combinedQuyCach,
                 'stacking_time' => $palletData['stackingTime'] ?? null,
                 'employee' => $palletData['employee'] ?? null,
+                'sorting_method' => $palletData['sortingMethod'] ?? 1,
             ]);
 
             $palletDetails = $request->input('Details', []);
@@ -481,7 +482,7 @@ class DryingOvenController extends Controller
 
             if (!$stockTransferResponse->successful()) {
                 $gPALLETService->deletePallet($palletResult['DocEntry']);
-                throw new \Exception('Tạo StockTransfer SAP có lỗi.');
+                throw new \Exception('Tạo StockTransfer SAP có lỗi. ' . json_encode($stockTransferResult));
             }
 
             Pallet::where('palletID', $pallet->palletID)->update([
@@ -490,7 +491,7 @@ class DryingOvenController extends Controller
                 'DocEntry' => $stockTransferResult['DocEntry'],
                 'palletSAP' => $palletResult['DocEntry'],
                 'CreateBy' => Auth::user()->id,
-                'activeStatus' => 0,
+                'activeStatus' => 0
             ]);
             DB::commit();
 
