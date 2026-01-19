@@ -499,6 +499,7 @@ class UserController extends Controller
     {
         $users = User::where('plant', $factory)
             ->where('role', 22)
+            ->where('is_block', 0)
             ->get();
 
         return response()->json($users, 200);
