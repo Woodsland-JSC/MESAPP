@@ -31,19 +31,11 @@ const genderOptions = [
 
 const validationSchema = Yup.object().shape({
     lastName: Yup.string()
-        .matches(/^[\p{L} ]+$/u, "Chỉ cho phép chữ cái và khoảng trắng")
         .max(30, "Họ không được quá 30 kí tự")
         .required("Họ là bắt buộc"),
     firstName: Yup.string()
-        .matches(/^[\p{L} ]+$/u, "Chỉ cho phép chữ cái và khoảng trắng")
         .max(30, "Tên không được quá 30 kí tự")
         .required("Tên là bắt buộc"),
-    // email: Yup.string()
-    //     .email("Email không hợp lệ")
-    //     .required("Email là bắt buộc"),
-    // gender: Yup.string()
-    //     .oneOf(["male", "female"], "Giá trị không hợp lệ")
-    //     .required("Giới tính là bắt buộc"),
     password: Yup.string()
         .required("Mật khẩu là bắt buộc")
         .test("uppercase", "Mật khẩu cần có ít nhất 1 kí tự in hoa", (value) =>
