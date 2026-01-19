@@ -637,6 +637,7 @@ class PlanController extends Controller
                         "U_CreateBy" => Auth::user()->sap_id,
                         "BPLID" => Auth::user()->branch,
                         "Comments" => "WLAPP PORTAL điều chuyển pallet ra lò sấy lại",
+                        "U_FSAY" => 'COMPLETED',
                         "StockTransferLines" => $data
                     ];
                     inventorytransfer::dispatch($body);
@@ -975,6 +976,7 @@ class PlanController extends Controller
                         "U_CreateBy" => Auth::user()->sap_id,
                         "BPLID" => Auth::user()->branch,
                         "Comments" => "WLAPP PORTAL điều chuyển pallet ra lò",
+                        "U_FSAY" => 'COMPLETED',
                         "StockTransferLines" => $data
                     ];
                     inventorytransfer::dispatch($body);
@@ -1109,7 +1111,8 @@ class PlanController extends Controller
                         "U_Pallet" => $header->Code,
                         "U_CreateBy" => Auth::user()->sap_id,
                         "BPLID" => Auth::user()->branch,
-                        "Comments" => "WLAPP PORTAL điều chuyển pallet ra lò",
+                        "Comments" => "WLAPP PORTAL điều chuyển pallet ra lò sấy lại",
+                        "U_FSAY" => 'COMPLETED',
                         "StockTransferLines" => $data
                     ];
                     inventorytransfer::dispatch($body);
