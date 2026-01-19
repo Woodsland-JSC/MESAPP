@@ -84,6 +84,7 @@ function DryingQueueReport() {
                 return {
                     created_at: item.created_at,
                     sorting_method: item.sorting_method,
+                    sorting_method_name: item.sorting_method_name,
                     code: item.Code,
                     ma_lo: item.MaLo,
                     item_code: item.ItemCode,
@@ -157,9 +158,9 @@ function DryingQueueReport() {
         },
         {
             headerName: "Kiểu xếp",
-            field: "sorting_method",
+            field: "sorting_method_name",
             width: 200,
-            filter: true,
+            filter: 'true'
         },
         {
             headerName: "MNV",
@@ -167,6 +168,11 @@ function DryingQueueReport() {
             width: 100,
             suppressHeaderMenuButton: true,
             filter: true,
+            valueFormatter: params => {
+                if (!params.value) return "";
+                if (!params.data) return '';
+                return params.data.sorting_method == 1 ? params.value : '';
+            }
         },
         {
             headerName: "Người xếp",
@@ -174,6 +180,11 @@ function DryingQueueReport() {
             width: 200,
             suppressHeaderMenuButton: true,
             filter: true,
+            valueFormatter: params => {
+                if (!params.value) return "";
+                if (!params.data) return '';
+                return params.data.sorting_method == 1 ? params.value : '';
+            }
         },
         {
             headerName: "Mã pallet",
