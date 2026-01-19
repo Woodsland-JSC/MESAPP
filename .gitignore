@@ -18,7 +18,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-.package-lock.json
+package-lock.json
 composer.lock
 
 # Laravel 9+ (Ignition cache, Telescope, Horizon, etc.)

@@ -44,6 +44,7 @@ import { HiViewColumns } from "react-icons/hi2";
 import { FaCheck, FaCircle } from "react-icons/fa";
 import { getIndatesByItem } from "../../../api/MasterDataApi";
 import { WOOD_DRYING_SORTING_METHOD } from "../../../shared/data";
+import { Html5Qrcode } from "html5-qrcode";
 
 function WoodSorting() {
     const { user } = useAppContext();
@@ -66,6 +67,12 @@ function WoodSorting() {
         onClose: onDeletePalletConfirmClose,
     } = useDisclosure();
 
+    const {
+        isOpen: isModalQrOpen,
+        onOpen: onModalQrOpen,
+        onClose: onModalQrClose,
+    } = useDisclosure();
+
     // States
     const [loading, setLoading] = useState(false);
     const [createPalletLoading, setCreatePalletLoading] = useState(false);
@@ -73,6 +80,7 @@ function WoodSorting() {
     const [palletHistoryLoading, setPalletHistoryLoading] = useState(false);
     const [palletListLoading, setPalletListLoading] = useState(false);
     const [palletTracingLoading, setPalletTracingLoading] = useState(false);
+    const [loadingQR, setLoadingQR] = useState(false);
 
     const [woodTypes, setWoodTypes] = useState([]);
     const [dryingMethodsOptions, setDryingMethodsOptions] = useState([]);
@@ -222,6 +230,7 @@ function WoodSorting() {
 
     const [inDates, setInDates] = useState([]);
     const [inDate, setInDate] = useState(null);
+    const [qr, setQr] = useState(null);
 
     const getEmployee = async () => {
         try {
@@ -904,6 +913,33 @@ function WoodSorting() {
     const handleResetPalletHistory = () => {
         setPalletHistory([]);
     };
+
+    const scanQr = async () => {
+        try {
+            setLoadingQR(true);
+            onModalQrOpen();
+            const qrCode = new Html5Qrcode("qr-cam-id");
+
+
+            await qrCode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: 280
+                },
+                async (text) => {
+                    console.log("QR = ", text);
+                    await qrCode.stop();
+                }
+            );
+            setLoadingQR(false);
+            setQr(qrCode);
+        } catch (error) {
+            toast.error("Lỗi khi quét mã QR.");
+            console.error("Lỗi khi quét mã QR:", error);
+            setLoadingQR(false);
+        }
+    }
 
     return (
         <Layout>
@@ -1914,7 +1950,19 @@ function WoodSorting() {
                                         )
                                     }
                                 </div>
-                                <div className="flex w-full justify-end items-end">
+                                <div className="flex md:w-full md:justify-end md:items-end justify-between gap-x-2">
+                                    {
+                                        user?.role == 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={scanQr}
+                                                className="block md:hidden text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                                disabled={createPalletLoading}
+                                            >
+                                                Quét QR
+                                            </button>
+                                        )
+                                    }
                                     <button
                                         type="button"
                                         onClick={handleAddToList}
@@ -2034,9 +2082,61 @@ function WoodSorting() {
                             </ModalFooter>
                         </ModalContent>
                     </Modal>
+
+                    <div
+                        style={{
+                            display: isModalQrOpen ? "flex" : "none",
+                            position: "fixed",
+                            inset: 0,
+                            background: "rgba(0,0,0,.6)",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            zIndex: 9999
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: 320,
+                                height: 300,
+                                background: "#fff",
+                                borderRadius: 12,
+                                padding: 12
+                            }}
+                            className="flex flex-col justify-center items-center"
+                        >
+                            <div className={`flex justify-center items-center w-full`} id="qr-cam-id" ></div>
+
+                            {
+                                loadingQR && (
+                                    <div className="absolute inset-0 flex justify-center items-center">
+                                        <Spinner
+                                            thickness="7px"
+                                            speed="0.65s"
+                                            emptyColor="gray.200"
+                                            color="#155979"
+                                            size="xl"
+                                        />
+                                    </div>
+                                )
+                            }
+
+                            <div className="flex justify-center w-full mt-auto">
+                                <button onClick={() => {
+                                    onModalQrClose();
+                                    qr?.stop();
+                                    setQr(null);
+                                }}
+                                    className="block md:hidden text-white bg-gray-800 font-medium rounded-xl w-full sm:w-auto px-5 py-2.5 text-center cursor-pointer ">
+                                    Đóng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             {loading && <Loader />}
+
+
         </Layout>
     );
 }
