@@ -1192,8 +1192,8 @@ const ItemInput = ({
             }));
 
             console.log("RONGReceiptData:", RONGReceiptData);
-            
-            
+
+
             setRongData(res.stocks.length > 0 ? RONGReceiptData : []);
             onModalOpen();
         } catch (error) {
@@ -2472,10 +2472,7 @@ const ItemInput = ({
                                                 </div>
                                             </div>
                                             <div className="space-y-2 pb-3">
-                                                <Text className="font-semibold px-2">
-                                                    Số lượng tồn nguyên vật
-                                                    liệu:
-                                                </Text>
+                                                <Text className="font-semibold px-2">Số lượng tồn nguyên vật liệu:</Text>
                                                 {/* BOM Item Group */}
                                                 {selectedItemDetails?.stocks
                                                     .sort((a, b) =>
@@ -2486,13 +2483,7 @@ const ItemInput = ({
                                                     .map((item, index) => (
                                                         <div
                                                             key={index}
-                                                            className={`${parseInt(
-                                                                item.OnHand ||
-                                                                0
-                                                            ) <= 0
-                                                                ? "bg-gray-200"
-                                                                : "bg-blue-100"
-                                                                } flex flex-col py-2  mb-6 rounded-xl`}
+                                                            className={`${Number(item.OnHand || 0) <= 0 ? "bg-gray-200" : "bg-blue-100"} flex flex-col py-2  mb-6 rounded-xl`}
                                                         >
                                                             <div className="flex items-center justify-between gap-4 px-4">
                                                                 <div className="xl:max-w-[90%] lg:max-w-[90%] md:max-w-[80%] max-w-[65%]">
@@ -2533,18 +2524,15 @@ const ItemInput = ({
                                                                     </div>
                                                                 </div>
                                                                 <span
-                                                                    className={`${parseInt(
-                                                                        item.OnHand ||
-                                                                        0
-                                                                    ) <= 0
+                                                                    className={`${Number(item.OnHand ||0) <= 0
                                                                         ? "bg-gray-500"
                                                                         : "bg-[#155979]"
                                                                         } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
                                                                 >
-                                                                    {parseInt(
-                                                                        item.OnHand ||
-                                                                        0
-                                                                    ).toLocaleString()}
+                                                                    {Number(item.OnHand || 0).toLocaleString('en-US', {
+                                                                        minimumFractionDigits: 6,
+                                                                        maximumFractionDigits: 6
+                                                                    })}
                                                                 </span>
                                                             </div>
                                                         </div>
