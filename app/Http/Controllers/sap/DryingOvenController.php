@@ -412,6 +412,7 @@ class DryingOvenController extends Controller
                 "FromWarehouse" => $fromWarehouse,
                 "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
                 "U_MoveType" => 'DC_SAY',
+                "U_FSAY" => 'CREATED',
                 "StockTransferLines" => $ldt
             ];
 
