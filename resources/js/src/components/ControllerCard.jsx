@@ -167,9 +167,6 @@ function ControllerCard(props) {
     const [teams, setTeams] = useState([]);
     const [team, setTeam] = useState(null);
 
-    console.log(reason);
-
-
     let navigate = useNavigate();
 
     // State

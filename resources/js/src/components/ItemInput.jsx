@@ -2483,7 +2483,8 @@ const ItemInput = ({
                                                     .map((item, index) => (
                                                         <div
                                                             key={index}
-                                                            className={`${Number(item.OnHand || 0) <= 0 ? "bg-gray-200" : "bg-blue-100"} flex flex-col py-2  mb-6 rounded-xl`}
+                                                            className={`${(selectedItemDetails?.CongDoan == 'XV' ? Number(item.OnHand) : parseInt(item.OnHand || 0)) <= 0 ? "bg-gray-200" : "bg-blue-100"} 
+                                                            flex flex-col py-2  mb-6 rounded-xl`}
                                                         >
                                                             <div className="flex items-center justify-between gap-4 px-4">
                                                                 <div className="xl:max-w-[90%] lg:max-w-[90%] md:max-w-[80%] max-w-[65%]">
@@ -2524,15 +2525,17 @@ const ItemInput = ({
                                                                     </div>
                                                                 </div>
                                                                 <span
-                                                                    className={`${Number(item.OnHand ||0) <= 0
+                                                                    className={`${(selectedItemDetails?.CongDoan == 'XV' ? Number(item.OnHand) : parseInt(item.OnHand || 0)) <= 0
                                                                         ? "bg-gray-500"
                                                                         : "bg-[#155979]"
                                                                         } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
                                                                 >
-                                                                    {Number(item.OnHand || 0).toLocaleString('en-US', {
-                                                                        minimumFractionDigits: 6,
-                                                                        maximumFractionDigits: 6
-                                                                    })}
+                                                                    {
+                                                                        selectedItemDetails?.CongDoan == 'XV' ? Number(item.OnHand || 0).toLocaleString('en-US', {
+                                                                            minimumFractionDigits: 6,
+                                                                            maximumFractionDigits: 6
+                                                                        }) : parseInt(item.OnHand || 0).toLocaleString()
+                                                                    }
                                                                 </span>
                                                             </div>
                                                         </div>
