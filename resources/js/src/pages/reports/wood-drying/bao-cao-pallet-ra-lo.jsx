@@ -148,34 +148,10 @@ function DryingCompletedReport() {
                 let tt = dgnc * hs;
 
                 quyLuong = item.mass * tt;
-                console.log({
-                    created_at: item.created_at,
-                    code: item.code,
-                    ma_lo: item.ma_lo,
-                    item_code: item.item_code,
-                    item_name: item.item_name,
-                    thickness: parseInt(item.day),
-                    width: parseInt(item.rong),
-                    height: parseInt(item.dai),
-                    qty: parseInt(item.qty),
-                    mass: item.mass,
-                    reason: item.reason,
-                    status: item.status,
-                    mnv: item.created_username,
-                    khoiLuongTinhThuong,
-                    dgnc,
-                    quyLuong,
-                    stacking_time: item.stacking_time ?? "",
-                    completedDate: item.completed_date ?? '',
-                    completed_by: item.completed_by ?? '',
-                    type: item.type ?? '',
-                    created_fullname: item.created_fullname ?? '',
-                    completed_fullname: item.completed_fullname ?? '',
-                    hs,
-                    tt
-                });
+
                 return {
                     created_at: item.created_at,
+                    sorting_method: item.sorting_method,
                     code: item.code,
                     ma_lo: item.ma_lo,
                     item_code: item.item_code,
@@ -257,6 +233,13 @@ function DryingCompletedReport() {
         {
             headerName: "Ngày ra lò",
             field: "completedDate",
+            width: 200,
+            suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
+            headerName: "Kiểu xếp",
+            field: "sorting_method",
             width: 200,
             suppressHeaderMenuButton: true,
             filter: true,

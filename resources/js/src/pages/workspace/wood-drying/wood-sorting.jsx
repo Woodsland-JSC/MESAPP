@@ -210,7 +210,7 @@ function WoodSorting() {
     const [selectedDryingReason, setSelectedDryingReason] = useState(null);
     const [selectedDryingMethod, setSelectedDryingMethod] = useState(null);
     const [selectedBatchInfo, setSelectedBatchInfo] = useState(null);
-    const [selectedEmployee, setSelectedEmployee] = useState(false);
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [selectedSortingMethod, setSelectedSortingMethod] = useState(WOOD_DRYING_SORTING_METHOD[0]);
 
     const [palletCards, setPalletCards] = useState([]);
@@ -422,7 +422,7 @@ function WoodSorting() {
             toast.error("Thời gian thực hiện phải lớn hơn 0");
             return false;
         }
-        if (!selectedEmployee) {
+        if (!selectedEmployee && (selectedSortingMethod.value == WOOD_DRYING_SORTING_METHOD[0].value)) {
             toast.error("Nhân viên xếp sấy không được bỏ trống");
             return false;
         }
@@ -454,7 +454,7 @@ function WoodSorting() {
                 const batch = selectedDryingMethod.batchNum + '_' + ymd;
 
                 let find = BatchNums.find(item => item.BatchNum == batch);
-                
+
                 const response = await palletsApi.getStockByItem(
                     // selectedDryingMethod.code,
                     inDate.itemCode,
@@ -611,13 +611,7 @@ function WoodSorting() {
         });
     };
 
-    // Creating pallets
     const createPalletObject = () => {
-        const formatTime = (date) => {
-            if (!date) return null;
-            return new Date(date).toTimeString().slice(0, 8);
-        };
-
         const palletObject = {
             LoaiGo: selectedWoodType.value,
             MaLo: batchId,
@@ -625,7 +619,7 @@ function WoodSorting() {
             NgayNhap: inDate.value + ' 00:00:00',
             MaNhaMay: user?.plant,
             stackingTime: stackingTime,
-            employee: selectedEmployee.value,
+            employee: selectedEmployee?.value,
             sortingMethod: selectedSortingMethod.value,
             Details: palletCards.map((card) => ({
                 ItemCode: card.props.itemCode,
@@ -726,7 +720,7 @@ function WoodSorting() {
                 if (dryingMethodSelectRef) {
                     dryingMethodSelectRef.clearValue();
                 }
-                
+
                 setInDate(null);
                 setCreatePalletLoading(false);
                 setQuyCachList([]);
@@ -1874,25 +1868,6 @@ function WoodSorting() {
                                             className=" border border-gray-300 text-gray-900 pl-3 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
                                         />
                                     </div>
-                                    <div className="col-span-1">
-                                        <label
-                                            htmlFor="drying_reason"
-                                            className="block mb-1 text-md font-medium text-gray-900 "
-                                        >
-                                            Nhân viên xếp sấy{" "}
-                                            <span className="text-red-500">
-                                                *
-                                            </span>
-                                        </label>
-                                        <Select
-                                            placeholder="Chọn nhân viên xếp sấy"
-                                            options={employeeOptions}
-                                            onChange={(value) => {
-                                                setSelectedEmployee(value);
-                                            }}
-                                            isDisabled={palletCards.length > 0}
-                                        />
-                                    </div>
 
                                     <div className="col-span-1">
                                         <label
@@ -1914,6 +1889,30 @@ function WoodSorting() {
                                             value={selectedSortingMethod}
                                         />
                                     </div>
+
+                                    {
+                                        selectedSortingMethod.value == WOOD_DRYING_SORTING_METHOD[0].value && (
+                                            <div className="col-span-1">
+                                                <label
+                                                    htmlFor="drying_reason"
+                                                    className="block mb-1 text-md font-medium text-gray-900 "
+                                                >
+                                                    Nhân viên xếp sấy{" "}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <Select
+                                                    placeholder="Chọn nhân viên xếp sấy"
+                                                    options={employeeOptions}
+                                                    onChange={(value) => {
+                                                        setSelectedEmployee(value);
+                                                    }}
+                                                    isDisabled={palletCards.length > 0}
+                                                />
+                                            </div>
+                                        )
+                                    }
                                 </div>
                                 <div className="flex w-full justify-end items-end">
                                     <button
