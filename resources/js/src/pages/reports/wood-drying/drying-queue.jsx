@@ -81,53 +81,9 @@ function DryingQueueReport() {
                 params.plant
             );
             const formattedData = res.map((item) => {
-                // let khoiLuongTinhThuong = 0;
-                // let dgnc = 99500;
-                // let heSoQuyDoi = 1.35;
-                // let quyLuong = 0;
-
-                // if (item.day <= 16) {
-
-                // }
-
-                // if (item.day > 16 && item.day <= 21 && item.dai < 800) {
-                //     heSoQuyDoi = 1.2
-                //     dgnc = 88400;
-                // }
-
-                // if (item.day >= 22 && item.day <= 25 && item.dai < 800) {
-                //     heSoQuyDoi = 1;
-                //     dgnc = 73700;
-                // }
-
-                // if (item.day > 16 && item.day <= 21 && item.dai >= 800) {
-                //     heSoQuyDoi = 1;
-                //     dgnc = 73700;
-                // }
-
-                // if (item.day > 25) {
-                //     heSoQuyDoi = 0.85;
-                //     dgnc = 62600;
-                // }
-
-                // if (item.day >= 22 && item.day <= 25 && item.dai >= 800) {
-                //     heSoQuyDoi = 0.85;
-                //     dgnc = 62600;
-                // }
-
-                // // Tính toán
-                // khoiLuongTinhThuong = item.mass * heSoQuyDoi;
-
-
-                // let pow = 2;
-
-                // let hs = Math.pow((1 - 0.01), pow);
-                // let tt = dgnc * hs;
-
-                // quyLuong = item.mass * tt;
-
                 return {
                     created_at: item.created_at,
+                    sorting_method: item.sorting_method,
                     code: item.Code,
                     ma_lo: item.MaLo,
                     item_code: item.ItemCode,
@@ -197,6 +153,12 @@ function DryingQueueReport() {
             field: "created_at",
             width: 200,
             suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
+            headerName: "Kiểu xếp",
+            field: "sorting_method",
+            width: 200,
             filter: true,
         },
         {

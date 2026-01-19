@@ -145,6 +145,7 @@ class PalletController extends Controller
 
                     $result[] = [
                         'created_at' => Carbon::parse($pallet->created_at)->format('H:i:s d/m/Y'),
+                        'sorting_method' => $pallet->sorting_method == 1 ? 'Xếp sấy thủ công' : 'Xếp sấy máy',
                         'code' => $pallet->Code,
                         'ma_lo' => $pallet->MaLo,
                         'item_code' => $detail->ItemCode,
