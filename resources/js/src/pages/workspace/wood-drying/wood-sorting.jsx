@@ -2091,20 +2091,22 @@ function WoodSorting() {
                             background: "rgba(0,0,0,.6)",
                             justifyContent: "center",
                             alignItems: "center",
-                            zIndex: 9999
+                            zIndex: 9999,
+                            backdropFilter: "blur(4px)",
+                            WebkitBackdropFilter: "blur(4px)" 
                         }}
                     >
                         <div
                             style={{
-                                width: 320,
-                                height: 300,
+                                width: 240,
+                                height: 240,
                                 background: "#fff",
                                 borderRadius: 12,
                                 padding: 12
                             }}
-                            className="flex flex-col justify-center items-center"
+                            className="flex flex-col justify-center items-center md:hidden"
                         >
-                            <div className={`flex justify-center items-center w-full`} id="qr-cam-id" ></div>
+                            <div className={`flex justify-center items-center w-[180px] h-[180px]`} id="qr-cam-id" ></div>
 
                             {
                                 loadingQR && (
