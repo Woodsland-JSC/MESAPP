@@ -1411,8 +1411,7 @@ class ReportController extends Controller
 
         $conDB = (new ConnectController)->connect_sap();
 
-        // $query = 'CALL USP_StockBy_SPDICH_CDOAN_MES(?, ?, ?, ?, ?)';
-        $query = 'CALL USP_StockBy_SPDICH_CDOAN_TEST_MES(?, ?, ?, ?, ?)';
+        $query = 'CALL USP_VN_StockBy_SPDICH_CDOAN(?, ?, ?, ?, ?)';
 
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
