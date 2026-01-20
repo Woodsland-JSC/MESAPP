@@ -1411,16 +1411,14 @@ class ReportController extends Controller
 
         $conDB = (new ConnectController)->connect_sap();
 
-        $query = 'CALL USP_VN_StockBy_SPDICH_CDOAN(?, ?, ?, ?, ?)';
+        $query = 'CALL USP_VN_StockBy_SPDICH_CDOAN(?, ?, ?, ?)';
 
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
 
-        $defaultParam = null; // You can change this to your desired default value
-
-        if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $request->factory, $request->type, $defaultParam])) {
+        if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $request->factory, $request->type])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
 
