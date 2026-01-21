@@ -2096,8 +2096,8 @@ function WoodSorting() {
                             WebkitBackdropFilter: "blur(4px)"
                         }}
                     >
-                        <div className="flex flex-col justify-center items-center md:hidden w-[240px] h-auto bg-[#fff] rounded-[12px] p-[12px]">
-                            <div className={`flex justify-center items-center w-full`} id="qr-cam-id"></div>
+                        <div className="flex flex-col justify-center items-center md:hidden w-[240px] h-auto bg-[#fff] rounded-[12px] p-[12px] gap-y-2">
+                            <div className={`flex justify-center items-center`} id="qr-cam-id"></div>
 
                             {
                                 loadingQR && (

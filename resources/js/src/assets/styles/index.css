@@ -19,7 +19,7 @@ html {
     background-repeat:no-repeat;
     min-height: 100%;
     height: auto;
-  }
+}
 
 body {
     /* background: #eaeaed !important; */
@@ -622,5 +622,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 }
 
 #qr-cam-id {
-  height: 180px !important;
+  height: 100% !important;
+  width: 100% !important;
+  object-fit: cover !important;
 }
