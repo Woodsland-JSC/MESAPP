@@ -931,6 +931,10 @@ function WoodSorting() {
                     console.log("QR = ", text);
                     await qrCode.stop();
 
+                    onModalQrClose();
+                    qr?.stop();
+                    setQr(null);
+
                     Swal.fire({
                         title: 'Dữ liệu QR',
                         text: text,
