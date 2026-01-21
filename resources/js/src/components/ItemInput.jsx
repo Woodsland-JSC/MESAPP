@@ -1795,8 +1795,7 @@ const ItemInput = ({
                                             </div>
                                             <Box className=" pt-2">
                                                 <label className="mt-6 font-semibold">
-                                                    Số lượng ghi nhận bán thành
-                                                    phẩm:
+                                                    Số lượng ghi nhận <br /><span className="text-green-600">(Nhập số lượng thực tế đã rong)</span>
                                                 </label>
                                                 {selectedItemDetails?.FatherStock <=
                                                     0 ? (
