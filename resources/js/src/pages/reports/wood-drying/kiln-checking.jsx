@@ -464,7 +464,7 @@ function KilnCheckingReport() {
             // Thêm dữ liệu mẫu
             for (let i = 1; i <= 5; i++) {
                 worksheet.getCell(`D${currentRow}`).value = `Mẫu ${i}: ${
-                    reportData?.ActualThickness?.[`sample_${i}`] ||
+                    reportData?.ActualThickness[0]?.[`M${i}`] ||
                     "Chưa ghi nhận"
                 }`;
                 currentRow++;
@@ -508,7 +508,7 @@ function KilnCheckingReport() {
             // Thêm dữ liệu quạt
             for (let i = 1; i <= 8; i++) {
                 worksheet.getCell(`D${currentRow}`).value = `Quạt ${i}: ${
-                    reportData?.FanSpeed?.[`fan_${i}`] || "null"
+                    reportData?.FanSpeed[0]?.[`Q${i}`] || "null"
                 } (m/s)`;
                 currentRow++;
             }
