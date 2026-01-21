@@ -930,6 +930,12 @@ function WoodSorting() {
                 async (text) => {
                     console.log("QR = ", text);
                     await qrCode.stop();
+
+                    Swal.fire({
+                        title: 'Dữ liệu QR',
+                        text: text,
+                        icon: "success",
+                    });
                 }
             );
             setLoadingQR(false);
