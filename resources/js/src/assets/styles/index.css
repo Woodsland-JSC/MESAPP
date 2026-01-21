@@ -620,3 +620,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     color:#FFFFFF !important;
     
 }
+
+#qr-cam-id {
+  height: 180px !important;
+}

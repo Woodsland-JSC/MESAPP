@@ -2096,19 +2096,8 @@ function WoodSorting() {
                             WebkitBackdropFilter: "blur(4px)"
                         }}
                     >
-                        <div
-                            style={{
-                                width: 240,
-                                height: 240,
-                                background: "#fff",
-                                borderRadius: 12,
-                                padding: 12
-                            }}
-                            className="flex flex-col justify-center items-center md:hidden"
-                        >
-                            <div className={`flex justify-center items-center w-full`} id="qr-cam-id" style={{
-                                height: "100px !important",
-                            }}></div>
+                        <div className="flex flex-col justify-center items-center md:hidden w-[240px] h-auto bg-[#fff] rounded-[12px] p-[12px]">
+                            <div className={`flex justify-center items-center w-full`} id="qr-cam-id"></div>
 
                             {
                                 loadingQR && (
@@ -2124,7 +2113,7 @@ function WoodSorting() {
                                 )
                             }
 
-                            <div className="flex justify-center w-full mt-auto">
+                            <div className="flex justify-center w-full mt-auto !h-[40px]">
                                 <button onClick={() => {
                                     onModalQrClose();
                                     qr?.stop();
