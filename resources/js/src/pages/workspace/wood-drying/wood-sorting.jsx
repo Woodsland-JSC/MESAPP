@@ -2106,7 +2106,7 @@ function WoodSorting() {
                             }}
                             className="flex flex-col justify-center items-center md:hidden"
                         >
-                            <div className={`flex justify-center items-center`} id="qr-cam-id" ></div>
+                            <div className={`flex justify-center items-center w-full`} id="qr-cam-id" ></div>
 
                             {
                                 loadingQR && (
