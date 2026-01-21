@@ -626,3 +626,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   width: 100% !important;
   object-fit: cover !important;
 }
+
+#qr-cam-id video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
