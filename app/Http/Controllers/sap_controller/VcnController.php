@@ -239,7 +239,7 @@ class VcnController extends Controller
             ];
 
             $CongDoan = null;
-            foreach ($chiTietSLRong as $key => $result) {
+            foreach ($chiTietSLRong as $key => &$result) {
 
                 $U_CDOAN = $result['U_CDOAN'];
 
