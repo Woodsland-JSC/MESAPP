@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo, forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../../layouts/layout";
 import { Link } from "react-router-dom";
@@ -11,7 +11,7 @@ import AsyncSelect from "react-select/async";
 import palletsApi from "../../../api/palletsApi";
 import usersApi from "../../../api/userApi";
 import toast from "react-hot-toast";
-import { Spinner } from "@chakra-ui/react";
+import { Button, Spinner } from "@chakra-ui/react";
 import moment from "moment";
 import { Avatar } from "@chakra-ui/react";
 
@@ -34,6 +34,13 @@ import {
     ModalBody,
     ModalCloseButton,
     useDisclosure,
+    Drawer,
+    DrawerBody,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
 } from "@chakra-ui/react";
 import { BiConfused, BiSolidFactory } from "react-icons/bi";
 import { SiConfluence, SiElasticstack, SiKoyeb } from "react-icons/si";
@@ -45,6 +52,8 @@ import { FaCheck, FaCircle } from "react-icons/fa";
 import { getIndatesByItem } from "../../../api/MasterDataApi";
 import { WOOD_DRYING_SORTING_METHOD } from "../../../shared/data";
 import { Html5Qrcode } from "html5-qrcode";
+import { QRCodeCanvas } from "qrcode.react";
+import PalletQrPrint from "./PalletQrPrint";
 
 function WoodSorting() {
     const { user } = useAppContext();
@@ -65,6 +74,12 @@ function WoodSorting() {
         isOpen: isDeletePalletConfirmOpen,
         onOpen: onDeletePalletConfirmOpen,
         onClose: onDeletePalletConfirmClose,
+    } = useDisclosure();
+
+    const {
+        isOpen: isOpenQR,
+        onOpen: onOpenQR,
+        onClose: onCloseQR,
     } = useDisclosure();
 
     const {
@@ -231,6 +246,8 @@ function WoodSorting() {
     const [inDates, setInDates] = useState([]);
     const [inDate, setInDate] = useState(null);
     const [qr, setQr] = useState(null);
+    const [currentPalletCreated, setCurrentPalletCreated] = useState(null);
+    const refQr = useRef();
 
     const getEmployee = async () => {
         try {
@@ -720,6 +737,12 @@ function WoodSorting() {
                 });
                 onConfirmClose();
 
+                setCurrentPalletCreated({
+                    code: response.data.data.pallet.Code,
+                    malo: palletObject.MaLo,
+                    lydo: palletObject.LyDo
+                });
+
                 if (woodTypeSelectRef) {
                     woodTypeSelectRef.clearValue();
                 }
@@ -740,6 +763,8 @@ function WoodSorting() {
                 setPalletQuantities({});
                 getEmployee();
                 setSelectedSortingMethod(WOOD_DRYING_SORTING_METHOD[0]);
+
+                // onModalQrOpen();
             }
         } catch (error) {
             console.error("Error creating pallet:", error);
@@ -951,8 +976,20 @@ function WoodSorting() {
         }
     }
 
+    const handlePrint = () => {
+        window.print();
+    }
+
     return (
         <Layout>
+            <div id="qr-pallet" style={{ visibility: "hidden", display: "none" }}>
+                {
+                    <div className="print-row">
+                        <PalletQrPrint/>
+                        {/* <PalletQrPrint /> */}
+                    </div>
+                }
+            </div>
             {/* Container */}
             <div className="flex mb-4 xl:mb-0 justify-center bg-transparent">
                 {/* Section */}
@@ -2139,7 +2176,40 @@ function WoodSorting() {
             </div>
             {loading && <Loader />}
 
+            {
+                user?.role == 1 && (
+                    <Drawer
+                        isOpen={false}
+                        placement='bottom'
+                        onClose={() => {
+                            onCloseQR();
+                            setCurrentPalletCreated(null);
+                        }}
+                        size={"lg"}
+                    >
+                        <DrawerOverlay />
+                        <DrawerContent>
+                            <DrawerHeader fontSize={"2xl"}>YS2544-00001</DrawerHeader>
 
+                            <DrawerBody display="flex" maxH="fit-content" alignItems={"center"} justifyContent={"center"}>
+                                <PalletQrPrint flex={true}/>
+                            </DrawerBody>
+
+                            <DrawerFooter>
+                                <Button className="bg-gradient-to-r from-[#1e2737] to-[#072450]" textColor={"white"} width={"lg"} variant='outline' mr={3} onClick={() => {
+                                    onCloseQR();
+                                    setCurrentPalletCreated(null);
+                                }}>
+                                    Đóng
+                                </Button>
+                                <Button width={"lg"} colorScheme='green' onClick={() => {
+                                    handlePrint();
+                                }}>In QR</Button>
+                            </DrawerFooter>
+                        </DrawerContent>
+                    </Drawer>
+                )
+            }
         </Layout>
     );
 }

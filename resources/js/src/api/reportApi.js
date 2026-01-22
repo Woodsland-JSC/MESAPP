@@ -299,6 +299,16 @@ const reportApi = {
                 report_resolution_id
             }
         });
+    },
+
+    exportReportSolutionById: (report_resolution_id) => {
+        const url = `/report/export-bienban`;
+        return axiosClient().get(url, {
+            params: {
+                report_resolution_id
+            },
+            responseType: "blob"
+        });
     }
 };
 

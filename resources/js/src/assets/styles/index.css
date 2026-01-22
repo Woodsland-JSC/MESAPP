@@ -477,30 +477,57 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     background-color: #7066e0 !important;
 }
 
-/* #pdf-content */
-/* Khi in, chỉ hiện content */
+
 @media print {
-  body * {
-    visibility: hidden;   /* Ẩn toàn bộ */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
   }
-  #pdf-content, #pdf-content * {
-    visibility: visible;  /* Chỉ hiện phần content */
+
+   body * {
+   visibility: hidden    !important;
   }
-  #pdf-content {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
+
+   #qr-pallet,
+  #qr-pallet * {
+    visibility: visible !important;
+  }
+
+  #qr-pallet {
+    width: 100% !important;
+    height: 110mm !important;
+    overflow: hidden !important;
+    page-break-after: avoid !important;
+
+    display: flex !important;
+    align-items: center !important;    
+    justify-content: center !important;
+  }
+/* 
+   .print-row {
+    display: flex;
+    gap: 10mm;
+  } */
+
+  .print-qr {
+    width: 100% !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   @page {
-    size: A4 landscape !important;
-    /* margin: 20mm; */
+    size: A5 landscape !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  #signature-qc {
-    page-break-inside: avoid; /* cho Chrome/Edge */
-    break-inside: avoid;      /* chuẩn mới */
+  canvas {
+    display: block;
+    margin: 0 auto;
+    padding: 0 !important;
   }
 }
 
