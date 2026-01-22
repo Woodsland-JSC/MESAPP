@@ -25,6 +25,7 @@ Route::prefix('jobs_wl')->group(function () {
 
 Route::prefix('imports')->group(function () {
     Route::get('import-pallet', [ImportController::class, 'index'])->name('imports.pallet');
+    Route::get('test-pdf', [ImportController::class, 'view_export_report_by_report_resolution_id'])->name('imports.view_export_report_by_report_resolution_id');
     Route::post('import-pallet', [ImportController::class, 'import_pallet'])->name('import-pallet-post');
     Route::post('solve', [ImportController::class, 'solve'])->name('solve');
 });

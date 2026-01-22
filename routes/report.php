@@ -32,5 +32,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/tao-bien-ban-xu-ly', [ReportController::class, 'create_report_solution']);
         Route::get('/lay-danh-sach-bien-ban', [ReportController::class, 'get_report_solution_by_factory']);
         Route::get('/lay-danh-sach-bien-ban-theo-id', [ReportController::class, 'get_list_report_by_report_resolution_id']);
+        Route::get('/export-bienban', [ReportController::class, 'export_report_by_report_resolution_id']);
     });
 });

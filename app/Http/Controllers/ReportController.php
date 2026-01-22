@@ -30,6 +30,7 @@ use App\Http\Controllers\sap\ConnectController;
 use App\Models\BienBanXuLyLoiCBG;
 use App\Models\HistorySL;
 use App\Services\HanaService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Exception as GlobalException;
 
 class ReportController extends Controller
@@ -1431,7 +1432,7 @@ class ReportController extends Controller
 
         // odbc_close($conDB);
 
-        $defaultParam = null; 
+        $defaultParam = null;
 
         $results = $hanaService->select('CALL USP_StockBy_SPDICH_CDOAN_VCN(?, ?, ?, ?, ?)', [
             $request->fromDate,
@@ -1721,7 +1722,6 @@ class ReportController extends Controller
             ->orderByDesc('B.id')
             ->get();
 
-        // ::select('category')->distinct()->get();
         return response()->json($results);
     }
 
@@ -1733,9 +1733,6 @@ class ReportController extends Controller
             return response()->json(['error' => 'Thiếu thông tin '], 500);
         }
 
-        // $data = DB::table('gt_report_resolutions_view');
-
-        // Start the query and add conditions based on the request inputs
         $query = DB::table('gt_cbg_baocaoxulyloi');
 
         $data = $query->where('reportResolutionId', '=', $report_resolution_id)
@@ -1744,4 +1741,64 @@ class ReportController extends Controller
 
         return response()->json($data);
     }
+
+    public function export_report_by_report_resolution_id(Request $request)
+    {
+        $report_resolution_id = $request->report_resolution_id;
+
+        if (!isset($report_resolution_id)) {
+            return response()->json(['error' => 'Thiếu thông tin '], 500);
+        }
+
+        $query = DB::table('gt_cbg_baocaoxulyloi');
+        $data = $query->where('reportResolutionId', '=', $report_resolution_id)
+            ->orderByDesc('reportResolutionId')
+            ->get();
+
+        $result = DB::table('bien_ban_xu_ly_loi_cbg as B')
+            ->where('B.id', '=', $report_resolution_id)
+            ->leftjoin('users as U', 'B.created_by', '=', 'U.id')
+            ->leftjoin('users as U1', 'B.id_GD', '=', 'U1.id')
+            ->leftjoin('users as U2', 'B.id_QC', '=', 'U2.id')
+            ->select(
+                'B.id',
+                'B.report_resolution_factory',
+                'B.created_by',
+                'B.created_at',
+                'U.first_name',
+                'U.last_name',
+                'U1.id as idGD',
+                'U2.id as idQC',
+                'U1.first_name as firstNameGD',
+                'U1.last_name as lastNameGD',
+                'U2.first_name as firstNameQC',
+                'U2.last_name as lastNameQC'
+            )
+            ->first();
+
+        $maBienBan = $result->report_resolution_factory . '-QC-' . str_pad( $result->id, 6, '0', STR_PAD_LEFT);
+        $ngayTao = Carbon::parse($result->created_at)->format('H \g\i\ờ i \p\h\ú\t, \n\g\à\y d \t\h\á\n\g m \n\ă\m Y');
+        $fullnameGD = $result->lastNameGD . " " . $result->firstNameGD;
+        $fullnameQC = $result->lastNameQC . " " . $result->firstNameQC;
+        $imageGD = "signature/" . $result->idGD . ".png";
+        $imageQC = "signature/" . $result->idQC . ".png";
+
+        $pdf = Pdf::loadView('pdfs.bienban-xulyloi', [
+            'result' => $result,
+            'data' => $data,
+            'maBienBan' => $maBienBan ,
+            'ngayTao' => $ngayTao,
+            'fullnameGD' => $fullnameGD,
+            'fullnameQC' => $fullnameQC,
+            'imageGD' => $imageGD,
+            'imageQC' => $imageQC,
+        ])->setPaper('A4', 'landscape')
+        ->setWarnings(false);
+
+        return response($pdf->output(), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="bien-ban.pdf"');
+    }
+
+    
 }

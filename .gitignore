@@ -20,6 +20,7 @@ yarn-error.log
 /.vscode
 package-lock.json
 composer.lock
+composer.json
 
 # Laravel 9+ (Ignition cache, Telescope, Horizon, etc.)
 /storage/debugbar

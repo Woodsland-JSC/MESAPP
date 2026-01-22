@@ -7,6 +7,7 @@ set_time_limit(0);
 use App\Models\Pallet;
 use App\Models\pallet_details;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use DateTime;
 use Exception;
 use Illuminate\Http\Request;
@@ -312,5 +313,15 @@ class ImportController extends Controller
         //     ]);
         //     DB::rollBack();
         // }
+    }
+
+    public function view_export_report_by_report_resolution_id(Request $request)
+    {
+        $pdf = Pdf::loadView('pdfs.bienban-xulyloi', [
+            'result' => [],
+            'data' => []
+        ])->setPaper('a4', 'landscape')
+        ->setWarnings(false);
+        return $pdf->stream('test-a4.pdf');
     }
 }

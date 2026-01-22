@@ -5,8 +5,7 @@ import { IoMdRadioButtonOff, IoMdRadioButtonOn } from "react-icons/io";
 import Select from "react-select";
 import logo from "../../../assets/images/WLorigin.svg";
 import reportApi from "../../../api/reportApi";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import { saveAs } from "file-saver";
 import toast from "react-hot-toast";
 import { Spinner } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
@@ -107,80 +106,17 @@ const ReportResolution = () => {
         }
     }
 
-    const exportPDF = async () => {
-        if (isExporting) return
-
+    const exportPDF1 = async () => {
         try {
-            setIsExport(true)
-            const element = pdfRef.current;
-            const canvas = await html2canvas(element, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: false,
-                backgroundColor: "#f0f0f0"
-            });
-
-            const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-
-            const pageWidth = pdf.internal.pageSize.getWidth();  // 297mm
-            const pageHeight = pdf.internal.pageSize.getHeight() - 10; // 210mm
-            const padding = 10; // 10mm padding
-
-            const usableWidth = pageWidth - padding * 2;
-            const usableHeight = pageHeight - padding * 2;
-
-            const imgWidth = canvas.width;
-            const imgHeight = canvas.height;
-            const ratio = usableWidth / imgWidth;
-
-            const scaledWidth = usableWidth;
-            const scaledHeight = imgHeight * ratio;
-
-            const totalPages = Math.ceil(scaledHeight / usableHeight);
-
-            for (let i = 0; i < totalPages; i++) {
-                const sourceY = (i * usableHeight) / ratio;
-                const pageCanvas = document.createElement("canvas");
-                pageCanvas.width = imgWidth;
-                pageCanvas.height = (usableHeight / ratio);
-
-                const ctx = pageCanvas.getContext("2d");
-                ctx.drawImage(
-                    canvas,
-                    0,
-                    sourceY,
-                    imgWidth,
-                    pageCanvas.height,
-                    0,
-                    0,
-                    imgWidth,
-                    pageCanvas.height
-                );
-
-                const pageImgData = pageCanvas.toDataURL("image/png");
-                if (i > 0) pdf.addPage();
-                pdf.addImage(
-                    pageImgData,
-                    "PNG",
-                    padding,
-                    padding,
-                    scaledWidth,
-                    usableHeight
-                );
-            }
-
-            let filename = currentReportSelected?.label || "BIÊN BẢN XỬ LÝ SẢN PHẨM KHÔNG PHÙ HỢP"
-
-            pdf.save(filename);
-            setIsExport(false)
-        } catch {
-            setIsExport(false)
-            toast.error("Xuất PDF có lỗi");
+            if(!currentReportSelected) return;
+            setIsExport(true);
+            let res = await reportApi.exportReportSolutionById(currentReportSelected.id);
+            saveAs(res, currentReportSelected?.label ?? "Biên bản xử lý lỗi.pdf");
+            setIsExport(false);
+        } catch (error) {
+            setIsExport(false);
+            toast.error("Xuất PDF có lỗi.");
         }
-    }
-
-    const exportPDF1 = () => {
-        window.print();
     }
 
     const handleGoBack = () => {
