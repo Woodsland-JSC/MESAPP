@@ -1893,6 +1893,14 @@ const ItemInput = ({
                                                                 </div>
                                                                 <div className="flex flex-col w-1/3 items-center">
                                                                     <div className="text-xl font-bold text-[#1F2937]">
+                                                                        {parseInt(stockItem?.ChoNhan || 0)}
+                                                                    </div>
+                                                                    <div className="uppercase font-semibold text-[13px] text-gray-500">
+                                                                        Chờ nhận
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex flex-col w-1/3 items-center">
+                                                                    <div className="text-xl font-bold text-[#1F2937]">
                                                                         {parseInt(
                                                                             stockItem?.Loi ||
                                                                             0
