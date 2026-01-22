@@ -256,16 +256,19 @@ class VcnController extends Controller
                 // Sau đó cập nhật giá trị ConLai mới trong $results = ConLai - Qty theo ItemCode của $results.
                 $itemCode = $result['ItemCode'];
                 $lsx = $result['U_GRID'];
-                // $chitietrongQty = DB::table('chitietrong')
-                //     ->join('notireceiptVCN', 'chitietrong.baseID', '=', 'notireceiptVCN.id')
-                //     ->where('notireceiptVCN.FatherCode', $request->FatherCode)
-                //     ->where('notireceiptVCN.team', $request->TO)
-                //     ->where('notireceiptVCN.version', $request->version)
-                //     ->where('chitietrong.ItemCode', $itemCode)
-                //     ->where('notireceiptVCN.LSX', '=', $lsx)
-                //     ->sum('chitietrong.Quantity');
+                $chitietrongQty = DB::table('chitietrong')
+                    ->join('notireceiptVCN', 'chitietrong.baseID', '=', 'notireceiptVCN.id')
+                    ->where('notireceiptVCN.FatherCode', $request->FatherCode)
+                    ->where('notireceiptVCN.team', $request->TO)
+                    ->where('notireceiptVCN.version', $request->version)
+                    ->where('chitietrong.ItemCode', $itemCode)
+                    ->where('notireceiptVCN.LSX', '=', $lsx)
+                    ->where('notireceiptVCN.confirm', 0)
+                    ->where('notireceiptVCN.deleted', 0)
+                    ->sum('chitietrong.Quantity');
 
-                // $result['ConLai'] = (float) $result['ConLai'] - (float) $chitietrongQty;
+                $result['ChoNhan'] = $chitietrongQty;
+                $result['ConLai'] = (float) $result['ConLai'] - (float) $chitietrongQty;
                 $chiTietSLRong[$key] = $result;
             }
 
