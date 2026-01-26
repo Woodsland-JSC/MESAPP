@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import useAppContext from "../../../store/AppContext";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Select from 'react-select';
-import { getItemsByFactory } from "../../../api/oitw.api";
+import { findItemByWh, getItemsByFactory } from "../../../api/oitw.api";
 import Loader from "../../../components/Loader";
 import AG_GRID_LOCALE_VI from '../../../utils/locale.vi';
 import { AgGridReact } from "ag-grid-react";
@@ -44,8 +44,13 @@ const PrintInventoryPosting = () => {
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isOpenItem, onOpen: onOpenItem, onClose: onCloseItem } = useDisclosure();
+    const { isOpen: isOpenAddItem, onOpen: onOpenAddItem, onClose: onCloseAddItem } = useDisclosure();
     const [searchBarCode, setSearchBarCode] = useState("");
     const [rowSelected, setRowSelected] = useState(null);
+    const [itemAdded, setItemAdded] = useState({
+        code: "",
+        error: "",
+    });
 
     const onGridReady = (params) => {
         setGridApi(params.api);
@@ -252,6 +257,41 @@ const PrintInventoryPosting = () => {
         ]
     }, [])
 
+    const onConfirmAddItem = async () => {
+        if(itemAdded.code == '' || !itemAdded.code) {
+            toast.error("Vui lòng nhập mã hoặc barcode vật tư.");
+            return;
+        }
+
+        let item = items.find(i => i.CodeBars === itemAdded.code || i.ItemCode === itemAdded.code);
+
+        if(item) {
+            toast.error("Mã vật tư đã có trong danh sách.");
+            return;
+        }
+
+        try {
+            const response = await findItemByWh(warehouse.value, itemAdded.code);
+
+            if(!response.data) {
+                toast.error("Không tìm thấy mã vật tư.");
+            }
+            
+            let item = response.data;
+            item.quantity = "";
+            setItems([...items, item]);
+            toast.success("Thêm vật tư thành công.");
+            onCloseAddItem();
+            setItemAdded({
+                code: "",
+                error: "",
+            });
+        } catch (error) {
+            toast.error("Tìm vật tư có lỗi.");
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
         if (warehouse) getItems();
     }, [warehouse])
@@ -295,35 +335,45 @@ const PrintInventoryPosting = () => {
                         </div>
                     </div>
 
-                    <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-4 lg:space-x-4 md:space-x-4 space-x-0 bg-white p-4 pt-3 rounded-xl mb-4 gap-x-2 gap-y-2 items-center">
-
-                        {user?.role == 1 && (
-                            <div className="md:w-1/6 w-full">
+                    <div className="flex justify-between bg-white mb-4 p-4 pt-3">
+                        <div className="w-[75%] flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-4 lg:space-x-4 md:space-x-4 space-x-0  rounded-xl  gap-x-2 gap-y-2 items-center">
+                            {user?.role == 1 && (
+                                <div className="md:w-1/2 w-full">
+                                    <label className=" text-sm font-medium text-gray-900">
+                                        Nhà máy
+                                    </label>
+                                    <Select
+                                        options={factories}
+                                        placeholder="Chọn nhà máy"
+                                        className="w-full mt-2 cursor-pointer"
+                                        onChange={(factory) => {
+                                            setFactory(factory);
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            <div className="md:w-1/2 w-full">
                                 <label className=" text-sm font-medium text-gray-900">
-                                    Nhà máy
+                                    Kho
                                 </label>
                                 <Select
-                                    options={factories}
-                                    placeholder="Chọn nhà máy"
+                                    options={warehouses}
+                                    placeholder="Chọn kho"
                                     className="w-full mt-2 cursor-pointer"
-                                    onChange={(factory) => {
-                                        setFactory(factory);
+                                    onChange={(warehouse) => {
+                                        setWarehouse(warehouse);
                                     }}
                                 />
                             </div>
-                        )}
-                        <div className="md:w-2/6 w-full">
-                            <label className=" text-sm font-medium text-gray-900">
-                                Kho
-                            </label>
-                            <Select
-                                options={warehouses}
-                                placeholder="Chọn kho"
-                                className="w-full mt-2 cursor-pointer"
-                                onChange={(warehouse) => {
-                                    setWarehouse(warehouse);
-                                }}
-                            />
+                        </div>
+                        <div className="w-[25%] md:flex hidden md:items-center md:justify-end">
+                            <button
+                                onClick={onOpenAddItem}
+                                type="button"
+                                className={`mt-0 cursor-pointer items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94]  font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2`}
+                            >
+                                Thêm mới
+                            </button>
                         </div>
                     </div>
 
@@ -362,41 +412,41 @@ const PrintInventoryPosting = () => {
                                             {
                                                 items.filter(i => {
                                                     if (!searchBarCode) return i;
-                                                    if(
+                                                    if (
                                                         i?.CodeBars && i?.CodeBars?.toLowerCase().includes(searchBarCode?.toLowerCase()) ||
                                                         i?.ItemName && i?.ItemName?.toLowerCase().includes(searchBarCode?.toLowerCase()) ||
                                                         i?.ItemCode && i?.ItemCode?.toLowerCase().includes(searchBarCode?.toLowerCase())
                                                     ) return i;
                                                 }).map((item, index) => (
-                                                        <div className="relative bg-[#F9FAFB] border-2 border-[#76929e] rounded-xl w-[100%] mb-2" key={index} >
-                                                            <div className="absolute -top-1 -right-2.5 bg-gray-800 text-white w-7 h-7 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 transition-all hidden">
-                                                                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="text-white " height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M400 145.49L366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49z"></path>
+                                                    <div className="relative bg-[#F9FAFB] border-2 border-[#76929e] rounded-xl w-[100%] mb-2" key={index} >
+                                                        <div className="absolute -top-1 -right-2.5 bg-gray-800 text-white w-7 h-7 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 transition-all hidden">
+                                                            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="text-white " height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M400 145.49L366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49z"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <div className="flex-col justify-center font-semibold p-4 py-3 border-b border-gray-200 bg-[#d6e4eb] w-full h-[80px] rounded-t-xl">
+                                                            <div className="text-md mb-1">{item.ItemName}</div>
+                                                            <div className="w-full flex items-center">
+                                                                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="text-[#17506B] w-2 h-2 mr-2" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M256 23.05C127.5 23.05 23.05 127.5 23.05 256S127.5 488.9 256 488.9 488.9 384.5 488.9 256 384.5 23.05 256 23.05z"></path>
                                                                 </svg>
-                                                            </div>
-                                                            <div className="flex-col justify-center font-semibold p-4 py-3 border-b border-gray-200 bg-[#d6e4eb] w-full h-[80px] rounded-t-xl">
-                                                                <div className="text-md mb-1">{item.ItemName}</div>
-                                                                <div className="w-full flex items-center">
-                                                                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="text-[#17506B] w-2 h-2 mr-2" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M256 23.05C127.5 23.05 23.05 127.5 23.05 256S127.5 488.9 256 488.9 488.9 384.5 488.9 256 384.5 23.05 256 23.05z"></path>
-                                                                    </svg>
-                                                                    <span className="w-full">{item.ItemCode}</span>
-                                                                </div>
-                                                            </div>
-                                                            <div className="text-gray-600 space-y-1 py-3 p-4 text-sm">
-                                                                <div className="">SL: {Number(item.OnHand)} ({item.IUoMEntry} {item.UomCode})</div>
-                                                                <div className="">Mã: {item?.CodeBars}</div>
-                                                            </div>
-                                                            <div className="border border-t">
-                                                                <button onClick={() => {
-                                                                    setRowSelected(item);
-                                                                    onOpenItem();
-                                                                }} type="button" className="flex items-center justify-center font-medium rounded-xl  w-full px-5 py-2.5 text-center gap-x-2 ">
-                                                                    Cập nhật
-                                                                </button>
+                                                                <span className="w-full">{item.ItemCode}</span>
                                                             </div>
                                                         </div>
-                                                    ))
+                                                        <div className="text-gray-600 space-y-1 py-3 p-4 text-sm">
+                                                            <div className="">SL: {Number(item.OnHand)} ({item.IUoMEntry} {item.UomCode})</div>
+                                                            <div className="">Mã: {item?.CodeBars}</div>
+                                                        </div>
+                                                        <div className="border border-t">
+                                                            <button onClick={() => {
+                                                                setRowSelected(item);
+                                                                onOpenItem();
+                                                            }} type="button" className="flex items-center justify-center font-medium rounded-xl  w-full px-5 py-2.5 text-center gap-x-2 ">
+                                                                Cập nhật
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))
                                             }
                                         </div>
                                     </div>
@@ -504,6 +554,46 @@ const PrintInventoryPosting = () => {
                     </AlertDialogContent>
                 </AlertDialogOverlay>
             </AlertDialog>}
+
+            <AlertDialog
+                isOpen={isOpenAddItem}
+                onClose={onCloseAddItem}
+                size={'2xl'}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize='md' fontWeight='bold'>
+                            Thêm vật tư kiểm kê
+                        </AlertDialogHeader>
+
+                        <AlertDialogBody>
+                            <Input placeholder="Tìm theo barcode hoặc mã sản phẩm" className="mb-2" onChange={e => setItemAdded({
+                                    ...itemAdded,
+                                    code: e.target.value
+                                })}
+                            />
+                            {
+                                itemAdded.error && (<span className="mt-2 text-red-600">{itemAdded.error}</span>)
+                            }
+                        </AlertDialogBody>
+
+                        <AlertDialogFooter>
+                            <Button onClick={() => {
+                                onCloseAddItem();
+                                setItemAdded({
+                                    code: "",
+                                    error: "",
+                                });
+                            }}>
+                                Hủy
+                            </Button>
+                            <Button className="chakra-wl-confirm-btn" onClick={onConfirmAddItem} ml={3}>
+                                Xác nhận
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
         </Layout>
     )
 }
