@@ -2889,47 +2889,47 @@ class VCNController extends Controller
                     ]);
                 }
 
-                if ($dt['RejectQty'] > 0) {
-                     $notidataError =notireceiptVCN::create([
-                        'LSX' => $request->LSX,
-                        'text' => 'Error information sent to QC',
-                        'MaThiTruong' => $request->MaThiTruong ?? null,
-                        'FatherCode' => $request->SubItemCode,
-                        'ItemCode' => $dt['ItemCode'],
-                        'ItemName' => $dt['ItemName'],
-                        'team' => $request->team,
-                        'Quantity' => $dt['RejectQty'],
-                        'NextTeam' => $request->NextTeam,
-                        'CongDoan' => $request->CongDoan,
-                        'type' => 1,
-                        'openQty' => $dt['RejectQty'],
-                        'ProdType' => $request->ProdType,
-                        'version' => $request->version,
-                        'isRONG' => true,
-                        'QtyIssueRong' => $request->QtyIssue,
-                        'CreatedBy' => Auth::user()->id,
-                        'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
-                        'disassembly_order_id' => $newOrder->id,
-                        'SubItemCode' => $request->SubItemCode,
-                        'SubItemName' => $request->SubItemName,
-                        'ErrorData' => json_encode($dt)
-                    ]);
+                // if ($dt['RejectQty'] > 0) {
+                //      $notidataError =notireceiptVCN::create([
+                //         'LSX' => $request->LSX,
+                //         'text' => 'Error information sent to QC',
+                //         'MaThiTruong' => $request->MaThiTruong ?? null,
+                //         'FatherCode' => $request->SubItemCode,
+                //         'ItemCode' => $dt['ItemCode'],
+                //         'ItemName' => $dt['ItemName'],
+                //         'team' => $request->team,
+                //         'Quantity' => $dt['RejectQty'],
+                //         'NextTeam' => $request->NextTeam,
+                //         'CongDoan' => $request->CongDoan,
+                //         'type' => 1,
+                //         'openQty' => $dt['RejectQty'],
+                //         'ProdType' => $request->ProdType,
+                //         'version' => $request->version,
+                //         'isRONG' => true,
+                //         'QtyIssueRong' => $request->QtyIssue,
+                //         'CreatedBy' => Auth::user()->id,
+                //         'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                //         'disassembly_order_id' => $newOrder->id,
+                //         'SubItemCode' => $request->SubItemCode,
+                //         'SubItemName' => $request->SubItemName,
+                //         'ErrorData' => json_encode($dt)
+                //     ]);
 
-                    ChiTietRong::create([
-                        'baseID' => $notidataError->id,
-                        'ItemCode' => $dt['ItemCode'],
-                        'ItemName' => $dt['ItemName'],
-                        'type' => 1,
-                        'openQty' => $dt['RejectQty'],
-                        'Quantity' => $dt['RejectQty'],
-                        'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
-                        'Team' => $request->Team,
-                        'NextTeam' => $request->NextTeam,
-                        'CDay' => $dt['CDay'],
-                        'CRong' => $dt['CRong'],
-                        'CDai' => $dt['CDai']
-                    ]);
-                }
+                //     ChiTietRong::create([
+                //         'baseID' => $notidataError->id,
+                //         'ItemCode' => $dt['ItemCode'],
+                //         'ItemName' => $dt['ItemName'],
+                //         'type' => 1,
+                //         'openQty' => $dt['RejectQty'],
+                //         'Quantity' => $dt['RejectQty'],
+                //         'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                //         'Team' => $request->Team,
+                //         'NextTeam' => $request->NextTeam,
+                //         'CDay' => $dt['CDay'],
+                //         'CRong' => $dt['CRong'],
+                //         'CDai' => $dt['CDai']
+                //     ]);
+                // }
             }
 
             DB::commit();
