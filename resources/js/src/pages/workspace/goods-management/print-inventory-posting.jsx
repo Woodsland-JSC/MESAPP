@@ -275,6 +275,7 @@ const PrintInventoryPosting = () => {
 
             if(!response.data) {
                 toast.error("Không tìm thấy mã vật tư.");
+                return
             }
             
             let item = response.data;
