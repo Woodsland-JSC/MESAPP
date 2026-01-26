@@ -19,3 +19,13 @@ export const getItemsSFByWh = (whCode) => {
         }
     });
 }
+
+export const findItemByWh = (whCode, code) => {
+    const url = `${BASEURL}/findItemByWh`;
+    return axiosClient().get(url, {
+        params: {
+            whCode,
+            code
+        }
+    });
+}

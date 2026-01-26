@@ -46,4 +46,20 @@ class OitwController extends Controller
             'items' => $items
         ]);
     }
+
+    public function findItemByWh(Request $request)
+    {
+        try {
+            $whCode = $request->query('whCode');
+            $code = $request->query('code');
+            $item = $this->oitwService->findItemByWh($whCode, $code);
+            return response()->json([
+                'data' => count($item) > 0 ? $item[0] : null
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Lấy danh sách Items có lỗi!'
+            ], 500);
+        }
+    }
 }

@@ -231,6 +231,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::group(['prefix' => 'sap/OITW'], function () {
         Route::get('getItemsByFactory', [OitwController::class, 'getItemsByFactory'])->name('getItemsByFactory');
         Route::get('getItemsSFByWh', [OitwController::class, 'getItemsSFByWh'])->name('getItemsSFByWh');
+        Route::get('findItemByWh', [OitwController::class, 'findItemByWh'])->name('findItemByWh');
 
         
     });
