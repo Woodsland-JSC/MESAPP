@@ -2871,7 +2871,7 @@ class VCNController extends Controller
                         'CreatedBy' => Auth::user()->id,
                         'disassembly_order_id' => $newOrder->id,
                         'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
-                        'Quantity' => $dt['CompleQty'],
+                        'Quantity' => $dt['CompleQty']
                     ]);
                     ChiTietRong::create([
                         'baseID' => $notidata->id,
@@ -2888,29 +2888,48 @@ class VCNController extends Controller
                         'CDai' => $dt['CDai']
                     ]);
                 }
-                // if ($dt['RejectQty'] > 0) {
-                //     $noti = notireceiptVCN::create([
-                //         'LSX' => $request->LSX,
-                //         'text' => 'Error information sent to QC',
-                //         'MaThiTruong' => $request->MaThiTruong ?? null,
-                //         'FatherCode' => $request->SubItemCode,
-                //         'ItemCode' => $dt['ItemCode'],
-                //         'ItemName' => $dt['ItemName'],
-                //         'team' => $request->team,
-                //         'Quantity' => $dt['RejectQty'],
-                //         'NextTeam' => $request->NextTeam,
-                //         'CongDoan' => $request->CongDoan,
-                //         'type' => 1,
-                //         'openQty' => 0,
-                //         'ProdType' => $request->ProdType,
-                //         'version' => $request->version,
-                //         'isRONG' => true,
-                //         'QtyIssueRong' => $request->QtyIssue,
-                //         'CreatedBy' => Auth::user()->id,
-                //         'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
-                //         'disassembly_order_id' => $newOrder->id,
-                //     ]);
-                // }
+
+                if ($dt['RejectQty'] > 0) {
+                     $notidataError =notireceiptVCN::create([
+                        'LSX' => $request->LSX,
+                        'text' => 'Error information sent to QC',
+                        'MaThiTruong' => $request->MaThiTruong ?? null,
+                        'FatherCode' => $request->SubItemCode,
+                        'ItemCode' => $dt['ItemCode'],
+                        'ItemName' => $dt['ItemName'],
+                        'team' => $request->team,
+                        'Quantity' => $dt['RejectQty'],
+                        'NextTeam' => $request->NextTeam,
+                        'CongDoan' => $request->CongDoan,
+                        'type' => 1,
+                        'openQty' => $dt['RejectQty'],
+                        'ProdType' => $request->ProdType,
+                        'version' => $request->version,
+                        'isRONG' => true,
+                        'QtyIssueRong' => $request->QtyIssue,
+                        'CreatedBy' => Auth::user()->id,
+                        'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                        'disassembly_order_id' => $newOrder->id,
+                        'SubItemCode' => $request->SubItemCode,
+                        'SubItemName' => $request->SubItemName,
+                        'ErrorData' => json_encode($dt)
+                    ]);
+
+                    ChiTietRong::create([
+                        'baseID' => $notidataError->id,
+                        'ItemCode' => $dt['ItemCode'],
+                        'ItemName' => $dt['ItemName'],
+                        'type' => 1,
+                        'openQty' => $dt['RejectQty'],
+                        'Quantity' => $dt['RejectQty'],
+                        'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                        'Team' => $request->Team,
+                        'NextTeam' => $request->NextTeam,
+                        'CDay' => $dt['CDay'],
+                        'CRong' => $dt['CRong'],
+                        'CDai' => $dt['CDai']
+                    ]);
+                }
             }
 
             DB::commit();
@@ -3128,7 +3147,7 @@ class VCNController extends Controller
         }
 
         try {
-            $data = notireceiptVCN::where('id', $request->id)->where('deleted', '=', 0)->where('type', '=', -1)->first();
+            $data = notireceiptVCN::where('id', $request->id)->where('deleted', '=', 0)->where('type', '=', 1)->first();
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
@@ -3145,7 +3164,7 @@ class VCNController extends Controller
             $receipt = ChiTietRong::where('baseID', $request->id)->where('type', '=', 0)->get();
             if ($receipt->count() == 0) {
                 if ($data->isQCConfirmed == 0) {
-                    $dataissueRong = $this->collecteEntryIssueRong($data->FatherCode, $data->team, $data->version);
+                    $dataissueRong = $this->collecteEntryIssueRong($data->FatherCode, $data->team, $data->version, $data->LSX);
                     $dataAllocateIssue = $this->allocatedIssueRong($dataissueRong, $data->QtyIssueRong);
                     if (count($dataAllocateIssue) == 0) {
                         return response()->json([
@@ -3231,7 +3250,6 @@ class VCNController extends Controller
 
                 historySLVCN::create(
                     [
-                        // 'LSX' => $data->LSX,
                         'itemchild' => $allocate['ItemCode'],
                         'SPDich' => $data->FatherCode,
                         'to' => $data->Team,
@@ -3239,7 +3257,11 @@ class VCNController extends Controller
                         "TOChuyenVe" => $teamBack,
                         'quantity' => $allocate['Allocated'],
                         'ObjType' => 202,
-                        'DocEntry' => ""
+                        'DocEntry' => "",
+                        'subCode' => "",
+                        'notiId' => $request->id,
+                        'LL' => $loailoi,
+                        'HXL' => $huongxuly
                     ]
                 );
             }
@@ -3276,6 +3298,7 @@ class VCNController extends Controller
                         'confirm' => 1,
                         'confirmBy' => Auth::user()->id,
                         'isQCConfirmed' => 1,
+                        'confirm_at' => Carbon::now()->format('YmdHis')
                     ]);
                     ChiTietRong::where('baseID', $request->id)->where('ItemCode', $request->ItemCode)->where('type', 1)->update([
                         'openQty' => $ctrong->openQty - $request->Qty
@@ -3326,15 +3349,15 @@ class VCNController extends Controller
 
         return array_values($filteredData);
     }
-    function collecteEntryIssueRong($item, $to, $version)
+    function collecteEntryIssueRong($item, $to, $version, $lsx)
     {
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'call usp_webOpenProductionOrder (?,?,?)';
+        $query = 'call usp_webOpenProductionOrder (?,?,?,?)';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, [$item, $to, $version])) {
+        if (!odbc_execute($stmt, [$item, $to, $version, $lsx])) {
             // Handle execution error
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
