@@ -408,9 +408,7 @@ class ReportController extends Controller
         }
 
         try {
-            // Tìm bản ghi kế hoạch sấy mới nhất với Oven = $kiln và status = 0 hoặc 1
-            $planDrying = planDryings::where('Oven', $kiln)
-                ->whereIn('Status', [0, 1])
+            $planDrying = planDryings::where('PlanID', $kiln)
                 ->orderBy('created_at', 'desc')
                 ->first();
 
