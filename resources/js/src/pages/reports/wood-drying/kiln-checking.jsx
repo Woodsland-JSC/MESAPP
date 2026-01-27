@@ -74,6 +74,7 @@ function KilnCheckingReport() {
             const options = res.data.map((item) => ({
                 value: item.PlanID,
                 label: `${item.Code}_${item.OvenName}`,
+                ovenName: item.OvenName
             }));
             setKilnOptions(options);
             setIsKilnLoading(false);
@@ -207,9 +208,7 @@ function KilnCheckingReport() {
             };
 
             // Row 3: Thông tin chi tiết
-            const kilnLabel =
-                kilnOptions.find((option) => option.value === reportData.Oven)
-                    ?.label || "Chưa chọn lò";
+            const kilnLabel = selectedKiln?.ovenName || "Chưa chọn lò";
             worksheet.getCell("A3").value = kilnLabel;
             worksheet.getCell("A3").fill = {
                 type: "pattern",
