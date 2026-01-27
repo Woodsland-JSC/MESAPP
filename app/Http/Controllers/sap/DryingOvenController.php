@@ -8,6 +8,7 @@ use App\Models\Pallet;
 use App\Models\pallet_details;
 use App\Models\planDryings;
 use App\Services\GPALLETService;
+use App\Services\HanaService;
 // use App\Models\Warehouse;
 use Exception;
 use Illuminate\Database\QueryException;
@@ -849,7 +850,7 @@ class DryingOvenController extends Controller
         return response()->json($loadedKilns, 200);
     }
 
-    function getCheckedKilnByFactory(Request $request)
+    function getCheckedKilnByFactory(Request $request, HanaService $service)
     {
         $validator = Validator::make($request->all(), [
             'factory' => 'required'
@@ -860,41 +861,52 @@ class DryingOvenController extends Controller
         }
         $factory = $request->factory;
 
-        $conDB = (new ConnectController)->connect_sap();
+        // $conDB = (new ConnectController)->connect_sap();
 
         $query = 'select "Code","Name" from "@G_SAY3" where "U_Factory" = ? ORDER BY "Code" ASC';
-        $stmt = odbc_prepare($conDB, $query);
-        if (!$stmt) {
-            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        // $stmt = odbc_prepare($conDB, $query);
+        // if (!$stmt) {
+        //     throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        // }
+        // if (!odbc_execute($stmt, [$factory])) {
+        //     throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        // }
+
+        // $allKilns = array();
+        // while ($row = odbc_fetch_array($stmt)) {
+        //     $allKilns[] = $row;
+        // }
+        // odbc_close($conDB);
+
+        $allKilns = $service->select($query, [$factory]);
+
+        // $loadedOvens = planDryings::where(function ($query) {
+        //     $query->where('Status', 0)->orWhere('Status', 1);
+        // })
+        //     ->where('Checked', '=', 1)
+        //     ->where('plant', $factory)
+        //     ->pluck('Oven')
+        //     ->unique()
+        //     ->toArray();
+
+        $loadedOvens = planDryings::where('Checked', '=', 1)
+            ->where('plant', $factory)
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        foreach ($loadedOvens as $key => &$item) {
+            $name = collect($allKilns)->where('Code', $item->Oven)->first();
+            $item['OvenName'] = $name['Name'];
         }
-        if (!odbc_execute($stmt, [$factory])) {
-            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-        }
 
-        $allKilns = array();
-        while ($row = odbc_fetch_array($stmt)) {
-            $allKilns[] = $row;
-        }
-        odbc_close($conDB);
+        // // Lọc danh sách lò từ SAP với các lò đã được vào lò
+        // $loadedKilns = array_filter($allKilns, function ($kiln) use ($loadedOvens) {
+        //     return in_array($kiln['Code'], $loadedOvens);
+        // });
 
-        // Lấy danh sách các lò đã được vào lò từ kế hoạch sấy chưa hoàn thành
-        $loadedOvens = planDryings::where(function ($query) {
-            $query->where('Status', 0)->orWhere('Status', 1);
-        })
-            ->where('Checked', '=', 1)
-            ->where('plant', $factory) // Giả sử trường plant chứa thông tin factory
-            ->pluck('Oven')
-            ->unique()
-            ->toArray();
+        // // Đảm bảo trả về array indexed từ 0
+        // $loadedKilns = array_values($loadedKilns);
 
-        // Lọc danh sách lò từ SAP với các lò đã được vào lò
-        $loadedKilns = array_filter($allKilns, function ($kiln) use ($loadedOvens) {
-            return in_array($kiln['Code'], $loadedOvens);
-        });
-
-        // Đảm bảo trả về array indexed từ 0
-        $loadedKilns = array_values($loadedKilns);
-
-        return response()->json($loadedKilns, 200);
+        return response()->json($loadedOvens, 200);
     }
 }

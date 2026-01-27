@@ -72,8 +72,8 @@ function KilnCheckingReport() {
             });
 
             const options = res.data.map((item) => ({
-                value: item.Code,
-                label: item.Name,
+                value: item.PlanID,
+                label: `${item.Code}_${item.OvenName}`,
             }));
             setKilnOptions(options);
             setIsKilnLoading(false);
@@ -83,7 +83,7 @@ function KilnCheckingReport() {
         }
     };
 
-    const getReportData = useCallback(async () => {
+    const getReportData = async () => {
         setIsDataReportLoading(true);
         try {
             const res = await axios.get("/api/report/say-bienbankiemtralosay", {
@@ -99,10 +99,10 @@ function KilnCheckingReport() {
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
             setIsDataReportLoading(false);
         }
-    }, [selectedKiln]);
+    }
 
     useEffect(() => {
-        if (selectedFactory) {
+        if (selectedFactory && selectedKiln) {
             getReportData();
         } else {
             console.log("Không thể gọi API vì không đủ thông tin");
