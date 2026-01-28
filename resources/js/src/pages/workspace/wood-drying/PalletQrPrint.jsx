@@ -29,7 +29,7 @@ const PalletQrPrint = ({ data, flex }) => {
                 marginBottom: flex ? "4mm" : ''
             }}>
                 <QRCodeCanvas
-                    value={"YS2544-00001"}
+                    value={data?.code}
                     size={flex ? 180 : 200}
                     level="H"
                     style={{
@@ -41,19 +41,26 @@ const PalletQrPrint = ({ data, flex }) => {
 
             <div style={{ gap: "2mm" }} className={`${flex ? 'text-center' : 'flex flex-col justify-start'} `}>
                 <div style={{ fontSize: "10mm", fontWeight: 700, lineHeight: 1 }}>
-                    YS2544-00001
+                    {data?.code}
+                </div>
+                {
+                    flex ? null : (<hr style={{
+                        border: 0,
+                        borderTop: "2px solid black"
+                    }}/>)
+                }
+                
+
+                <div style={{ fontSize: "6mm" }}>
+                    Mục đích: {data?.lydo}
                 </div>
 
                 <div style={{ fontSize: "6mm" }}>
-                    Mục đích: OUTDOOR
+                    Mã lô gỗ: {data?.malo}
                 </div>
 
                 <div style={{ fontSize: "6mm" }}>
-                    Mã lô gỗ: 25123s11
-                </div>
-
-                <div style={{ fontSize: "6mm" }}>
-                    [23x57x900 - 24x56x850]
+                    [{data?.quyCach}]
                 </div>
             </div>
         </div>

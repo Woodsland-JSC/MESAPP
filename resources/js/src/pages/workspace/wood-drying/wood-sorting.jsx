@@ -737,10 +737,15 @@ function WoodSorting() {
                 });
                 onConfirmClose();
 
+                let listQC = palletObject.Details.map(item => {
+                    return `${item.CDay}x${item.CRong}x${item.CDai}`;
+                });
+
                 setCurrentPalletCreated({
                     code: response.data.data.pallet.Code,
                     malo: palletObject.MaLo,
-                    lydo: palletObject.LyDo
+                    lydo: palletObject.LyDo,
+                    quyCach: listQC.join(' - ')
                 });
 
                 if (woodTypeSelectRef) {
@@ -985,7 +990,7 @@ function WoodSorting() {
             <div id="qr-pallet" style={{ visibility: "hidden", display: "none" }}>
                 {
                     <div className="print-row">
-                        <PalletQrPrint/>
+                        <PalletQrPrint data={currentPalletCreated}/>
                         {/* <PalletQrPrint /> */}
                     </div>
                 }
@@ -2177,9 +2182,9 @@ function WoodSorting() {
             {loading && <Loader />}
 
             {
-                user?.role == 1 && (
+                (user?.role == 1 && currentPalletCreated) && (
                     <Drawer
-                        isOpen={false}
+                        isOpen={isOpenQR}
                         placement='bottom'
                         onClose={() => {
                             onCloseQR();
@@ -2189,10 +2194,10 @@ function WoodSorting() {
                     >
                         <DrawerOverlay />
                         <DrawerContent>
-                            <DrawerHeader fontSize={"2xl"}>YS2544-00001</DrawerHeader>
+                            <DrawerHeader fontSize={"2xl"}>{currentPalletCreated.code}</DrawerHeader>
 
                             <DrawerBody display="flex" maxH="fit-content" alignItems={"center"} justifyContent={"center"}>
-                                <PalletQrPrint flex={true}/>
+                                <PalletQrPrint flex={true} data={currentPalletCreated}/>
                             </DrawerBody>
 
                             <DrawerFooter>
