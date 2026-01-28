@@ -251,9 +251,6 @@ class VcnController extends Controller
                     }
                 }
 
-                // Chỉnh sửa giá trị ConLai của mỗi bản ghi trong $results bằng cách lấy tổng số lượng của trường
-                // Quantity của bảng chitietrong có baseID = $notification->id. Nhóm theo ItemCode.
-                // Sau đó cập nhật giá trị ConLai mới trong $results = ConLai - Qty theo ItemCode của $results.
                 $itemCode = $result['ItemCode'];
                 $lsx = $result['U_GRID'];
                 $chitietrongQty = DB::table('chitietrong')

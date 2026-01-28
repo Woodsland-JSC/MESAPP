@@ -609,6 +609,7 @@ const ItemInput = ({
                 NextTeam: choosenItem.TOTT,
                 Data: rongData?.filter(item => item.CompleQty !== undefined && item.CompleQty !== null && item.CompleQty !== ""),
                 KHOI: "VCN",
+                loinhamay: faults?.factory?.value || user.plant || "",
             };
 
             const res = await productionApi.enterFinishedRongAmountVCN(Data);
