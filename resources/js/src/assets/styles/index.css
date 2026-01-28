@@ -506,11 +506,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     align-items: center !important;    
     justify-content: center !important;
   }
-/* 
-   .print-row {
-    display: flex;
-    gap: 10mm;
-  } */
 
   .print-qr {
     width: 100% !important;
@@ -519,6 +514,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   }
 
   @page {
+    /* size: A4 landscape !important; */
     size: A5 landscape !important;
     margin: 0 !important;
     padding: 0 !important;
