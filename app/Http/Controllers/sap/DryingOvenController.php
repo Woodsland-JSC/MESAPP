@@ -732,8 +732,8 @@ class DryingOvenController extends Controller
             'planDryings.runDate',
             DB::raw("CONCAT(users4.first_name,' ', users4.last_name) as CompletedBy"),
             'planDryings.CompletedDate',
-            'totals.Qty',
-            'totals.Qty_T',
+            'pallet_details.Qty',
+            'pallet_details.Qty_T',
 
         )
             ->join('pallet_details', 'pallets.palletID', '=', 'pallet_details.palletID')
@@ -746,17 +746,17 @@ class DryingOvenController extends Controller
             ->leftJoin('users as users3', 'users3.id', '=', 'planDryings.RunBy')
             ->leftJoin('users as users4', 'users4.id', '=', 'planDryings.CompletedBy')
             ->leftJoin('users as users6', 'users6.id', '=', 'pallets.LoadedBy')
-            ->leftJoinSub(function ($query) {
-                $query->select(
-                    'pallet_details.palletID',
-                    DB::raw('SUM(pallet_details.Qty) AS Qty'),
-                    DB::raw('SUM(pallet_details.Qty_T) AS Qty_T')
-                )
-                    ->from('pallet_details')
-                    ->groupBy('pallet_details.palletID');
-            }, 'totals', function ($join) {
-                $join->on('pallets.palletID', '=', 'totals.palletID');
-            })
+            // ->leftJoinSub(function ($query) {
+            //     $query->select(
+            //         'pallet_details.palletID',
+            //         DB::raw('SUM(pallet_details.Qty) AS Qty'),
+            //         DB::raw('SUM(pallet_details.Qty_T) AS Qty_T')
+            //     )
+            //         ->from('pallet_details')
+            //         ->groupBy('pallet_details.palletID');
+            // }, 'totals', function ($join) {
+            //     $join->on('pallets.palletID', '=', 'totals.palletID');
+            // })
             ->where('pallets.palletID', $request->palletID)
             ->get();
 

@@ -735,10 +735,11 @@ function WoodSorting() {
                     text: "Mã pallet đã được tạo!",
                     icon: "success",
                 });
+                // toast.success("Tạo pallet thành công.");
                 onConfirmClose();
 
                 let listQC = palletObject.Details.map(item => {
-                    return `${item.CDay}x${item.CRong}x${item.CDai}`;
+                    return `${Number(item.CDay)}x${Number(item.CRong)}x${Number(item.CDai)}`;
                 });
 
                 setCurrentPalletCreated({
@@ -769,7 +770,7 @@ function WoodSorting() {
                 getEmployee();
                 setSelectedSortingMethod(WOOD_DRYING_SORTING_METHOD[0]);
 
-                // onModalQrOpen();
+                // onOpenQR();
             }
         } catch (error) {
             console.error("Error creating pallet:", error);
@@ -871,18 +872,15 @@ function WoodSorting() {
                         const qty = Number(item.Qty_T) || 0;
                         updatedResult.totalQty_T += qty;
 
-                        const key = `${item.ItemName}_${Math.floor(
-                            item.CDay
-                        )}x${Math.floor(item.CRong)}x${Math.floor(item.CDai)}`;
+                        const key = `${item.ItemName}_${Number(item.CDay)}x${Number(item.CRong)}x${Number(item.CDai)}`;
+
                         if (itemInfo[key]) {
                             itemInfo[key].Qty_T += qty;
                         } else {
                             itemInfo[key] = {
                                 ItemName: item.ItemName,
                                 Qty_T: qty,
-                                QuyCach: `${Math.floor(item.CDay)}x${Math.floor(
-                                    item.CRong
-                                )}x${Math.floor(item.CDai)}`,
+                                QuyCach: `${Number(item.CDay)}x${Number(item.CRong)}x${Number(item.CDai)}`,
                             };
                         }
                     });
@@ -896,6 +894,13 @@ function WoodSorting() {
                         palletTracingData
                     );
                     setPalletTracingLoading(false);
+
+                    setCurrentPalletCreated({
+                        code: response.data.data[0].Code,
+                        lydo: response.data.data[0].LyDo,
+                        malo: response.data.data[0].MaLo,
+                        quyCach: result.data.map(item => `${item.QuyCach}`).join(' - ')
+                    });
                 }
             } catch (error) {
                 console.error("Error creating pallet:", error);
@@ -990,7 +995,7 @@ function WoodSorting() {
             <div id="qr-pallet" style={{ visibility: "hidden", display: "none" }}>
                 {
                     <div className="print-row">
-                        <PalletQrPrint data={currentPalletCreated}/>
+                        <PalletQrPrint data={currentPalletCreated} />
                         {/* <PalletQrPrint /> */}
                     </div>
                 }
@@ -1566,7 +1571,7 @@ function WoodSorting() {
                                                 <div className="p-3 rounded-xl bg-white border-2 space-y-3 border-gray-200">
                                                     {result.data.map(
                                                         (item, index) => (
-                                                            <div className="p-3 flex space-x-4 rounded-lg bg-[#edeeff] border">
+                                                            <div className="p-3 flex space-x-4 rounded-lg bg-[#edeeff] border" key={index}>
                                                                 <div className="p-2 bg-[#c3c8fc] rounded-lg w-fit h-fit ">
                                                                     <HiViewColumns className="w-8 h-8 text-gray-700" />
                                                                 </div>
@@ -1596,7 +1601,7 @@ function WoodSorting() {
                                                                                         <span>
                                                                                             <span>
                                                                                                 {
-                                                                                                    palletTracingData.Qty
+                                                                                                    item.Qty
                                                                                                 }
                                                                                             </span>{" "}
                                                                                             (m3)
@@ -1605,7 +1610,7 @@ function WoodSorting() {
                                                                                         <span>
                                                                                             <span>
                                                                                                 {
-                                                                                                    palletTracingData.Qty_T
+                                                                                                    item.Qty_T
                                                                                                 }
                                                                                             </span>{" "}
                                                                                             (T)
@@ -1783,6 +1788,27 @@ function WoodSorting() {
                                                         )}
                                                     </ol>
                                                     <div></div>
+                                                </div>
+
+                                                <p className="uppercase text-[15px] mt-5 mb-2 font-semibold text-gray-700">
+                                                    Phiếu Pallet{" "}
+                                                </p>
+                                                <div className="uppercase text-[15px] mt-5 mb-2 font-semibold text-gray-700">
+                                                    <button
+                                                        onClick={() => {
+                                                            setCurrentPalletCreated({
+                                                                code: palletTracingData.Code,
+                                                                lydo: palletTracingData.LyDo,
+                                                                malo: palletTracingData.MaLo,
+                                                                quyCach: result.data.map(item => `${item.QuyCach}`).join(' - ')
+                                                            });
+
+                                                            handlePrint();
+                                                        }}
+                                                        className="bg-green-600 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
+                                                    >
+                                                        In phiếu
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -2197,7 +2223,7 @@ function WoodSorting() {
                             <DrawerHeader fontSize={"2xl"}>{currentPalletCreated.code}</DrawerHeader>
 
                             <DrawerBody display="flex" maxH="fit-content" alignItems={"center"} justifyContent={"center"}>
-                                <PalletQrPrint flex={true} data={currentPalletCreated}/>
+                                <PalletQrPrint flex={true} data={currentPalletCreated} />
                             </DrawerBody>
 
                             <DrawerFooter>
@@ -2207,9 +2233,13 @@ function WoodSorting() {
                                 }}>
                                     Đóng
                                 </Button>
-                                <Button width={"lg"} colorScheme='green' onClick={() => {
-                                    handlePrint();
-                                }}>In QR</Button>
+                                {
+                                    user?.role == 1 && (
+                                        <Button width={"lg"} colorScheme='green' onClick={() => {
+                                            handlePrint();
+                                        }}>In QR</Button>
+                                    )
+                                }
                             </DrawerFooter>
                         </DrawerContent>
                     </Drawer>
