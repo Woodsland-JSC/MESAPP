@@ -3218,8 +3218,6 @@ class VCNController extends Controller
                 ], 500);
             }
 
-            $historySLVCNs = [];
-
             foreach ($newAllocates as $allocate) {
                 $dataReceipt[]  = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
@@ -3316,8 +3314,6 @@ class VCNController extends Controller
                     ChiTietRong::where('baseID', $request->id)->where('ItemCode', $request->ItemCode)->where('type', 1)->update([
                         'openQty' => $ctrong->openQty - $request->Qty
                     ]);
-
-                    historySLVCN::insert($historySLVCNs);
 
                     DB::commit();
                 } else {
