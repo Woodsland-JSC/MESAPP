@@ -41,4 +41,9 @@ class ORSCController extends Controller
             ], 500);
         }
     }
+
+    public function getTeamCdoanHT(Request $request, ORSCService $orscService){
+        $factory = $request->query('factory');
+        return $orscService->getTeamCdoanHT($factory);
+    }
 }

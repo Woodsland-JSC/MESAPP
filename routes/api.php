@@ -202,6 +202,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/ORSC/layDanhSachToTheoNhaMayCBG', [ORSCController::class, 'layDanhSachToTheoNhaMayCBG'])->name('layDanhSachToTheoNhaMayCBG');
     Route::get('/ORSC/getTeamProductionByFactory', [ORSCController::class, 'getTeamProductionByFactory'])->name('getTeamProductionByFactory');
+    Route::get('/ORSC/getTeamCdoanHT', [ORSCController::class, 'getTeamCdoanHT'])->name('getTeamCdoanHT');
+
+    
 
     Route::group(['prefix' => 'sap/masterdata'], function () {
         Route::get('danhSachNhaMayCBG', [SapMasterDataController::class, 'danhSachNhaMayCBG'])->name('danhSachNhaMayCBG');

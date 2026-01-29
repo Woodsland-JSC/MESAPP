@@ -28,6 +28,8 @@ class InventoryPostingController extends Controller
     {
         try {
             $data = $request->data;
+            $whCode =  $request->whCode;
+            $team =  $request->team;
 
             if (count($data) == 0) {
                 return response()->json([
@@ -35,12 +37,23 @@ class InventoryPostingController extends Controller
                 ], 500);
             }
 
-            $whCode =  $request->whCode;
+            if(!$team){
+                return response()->json([
+                    'message' => 'Vui lòng chọn tổ.'
+                ], 500);
+            }
+
+            if(!$whCode){
+                return response()->json([
+                    'message' => 'Vui lòng chọn kho.'
+                ], 500);
+            }
+
             $today = date("ymd");
 
             $postingData = [
                 "CountDate" => Carbon::now()->format('Y-m-d'),
-                "Remarks" => "Kiểm kê kho " . $whCode . " " .  $today,
+                "Remarks" => "Phiếu Kiểm kê kho " . $whCode . " " .  $today . " của tổ " . $team,
                 "InventoryCountingLines" => [],
                 "BranchID" => Auth::user()->branch
             ];
@@ -52,7 +65,8 @@ class InventoryPostingController extends Controller
                     "ItemCode" => $item["ItemCode"],
                     "WarehouseCode" => $item["WhsCode"],
                     "CountedQuantity" => (float)$item["quantity"],
-                    "UoMCode" => $item["UomCode"]
+                    "UoMCode" => $item["UomCode"],
+                    "OcrCode4" => $team
                 ];
             }
 
