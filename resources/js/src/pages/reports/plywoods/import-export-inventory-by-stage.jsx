@@ -276,8 +276,57 @@ function ImportExportInventoryByStage() {
                                 : { textAlign: "right" },
                     },
                     {
+                        headerName: "Số lượng LSX",
+                        field: "inwardInventoryLSX",
+                        filter: true,
+                        width: 170,
+                        suppressHeaderMenuButton: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+                        valueGetter: (params) => {
+                            if (params.node.level == -1 && params.node.footer) {
+                                if (params.api && params.api.getDisplayedRowAtIndex) {
+                                    const firstDataRow = params.api.getDisplayedRowAtIndex(0).allLeafChildren[0];
+                                    if (firstDataRow && firstDataRow.data) {
+                                        return firstDataRow.data?.inwardInventoryLSX ?? 0;
+                                    }
+                                }
+                                return 0;
+                            }
+                            if (isTargetProductGrouped && params.node.group && params.node.field === 'targetProduct') {
+                                if (params.node.allLeafChildren && params.node.allLeafChildren.length > 0) {
+                                    const firstChild = params.node.allLeafChildren[0];
+                                    return firstChild.data?.inwardInventoryBomLSX ?? 0;
+                                }
+                            }
+                            if (isStageGrouped && params.node.group && params.node.field === 'stage') {
+                                if (params.node.allLeafChildren && params.node.allLeafChildren.length > 0) {
+                                    const firstChild = params.node.allLeafChildren[0];
+                                    return firstChild.data?.inwardInventoryCDLSX ?? 0;
+                                }
+                            }
+                            return params.data?.inwardInventoryLSX ?? 0;
+                        },
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "right" },
+                    },
+                    {
                         headerName: "M3",
                         field: "inwardInventoryM3",
+                        filter: true,
+                        width: 170,
+                        suppressHeaderMenuButton: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+                        aggFunc: "sum",
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "right" },
+                    },
+                    {
+                        headerName: "M3 LSX",
+                        field: "inwardInventoryM3LSX",
                         filter: true,
                         width: 170,
                         suppressHeaderMenuButton: true,
@@ -330,8 +379,56 @@ function ImportExportInventoryByStage() {
                                 : { textAlign: "right" },
                     },
                     {
+                        headerName: "Số lượng LSX",
+                        field: "outwardInventoryLSX",
+                        filter: true,
+                        width: 170,
+                        suppressHeaderMenuButton: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+                        valueGetter: (params) => {
+                            if (params.node.level == -1 && params.node.footer) {
+                                if (params.api && params.api.getDisplayedRowAtIndex) {
+                                    const firstDataRow = params.api.getDisplayedRowAtIndex(0).allLeafChildren[0];
+                                    if (firstDataRow && firstDataRow.data) {
+                                        return firstDataRow.data?.outwardInventoryLSX ?? 0;
+                                    }
+                                }
+                                return 0;
+                            }
+                            if (isTargetProductGrouped && params.node.group && params.node.field === 'targetProduct') {
+                                if (params.node.allLeafChildren && params.node.allLeafChildren.length > 0) {
+                                    const firstChild = params.node.allLeafChildren[0];
+                                    return firstChild.data?.outwardInventoryBOMLSX ?? 0;
+                                }
+                            }
+                            if (isStageGrouped && params.node.group && params.node.field === 'stage') {
+                                if (params.node.allLeafChildren && params.node.allLeafChildren.length > 0) {
+                                    const firstChild = params.node.allLeafChildren[0];
+                                    return firstChild.data?.outwardInventoryCDLSX ?? 0;
+                                }
+                            }
+                            return params.data?.outwardInventoryLSX ?? 0;
+                        },
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "right" },
+                    },
+                    {
                         headerName: "M3",
                         field: "outwardInventoryM3",
+                        filter: true,
+                        width: 170,
+                        suppressHeaderMenuButton: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+                        aggFunc: "sum",
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "right" },
+                    },{
+                        headerName: "M3 LSX",
+                        field: "outwardInventoryM3LSX",
                         filter: true,
                         width: 170,
                         suppressHeaderMenuButton: true,
@@ -521,21 +618,39 @@ function ImportExportInventoryByStage() {
                     beginingInventoryBom: Number(item.BOM_CD_TonDauKySL),
                     beginingInventoryCD: Number(item.CD_TonDauKySL),
                     beginingInventoryTotal: Number(item.Total_TonDauKySL),
+
+
                     inwardInventory: Number(item.InQty),
+                    inwardInventorySX: Number(item.InQtySX),
                     inwardInventoryM3: Number(item.InQtyM3),
+                    inwardInventoryM3SX: Number(item.InQtyM3SX),
                     inwardInventoryBom: Number(item.BOM_CD_NhapTrongKySL),
+                    inwardInventoryBomLSX: Number(item.BOM_CD_NhapTrongKySLSX),
                     inwardInventoryCD: Number(item.CD_NhapTrongKySL),
+                    inwardInventoryCDLSX: Number(item.CD_NhapTrongKySLSX),
                     inwardInventoryTotal: Number(item.Total_NhapTrongKySL),
+                    inwardInventoryTotalLSX: Number(item.Total_NhapTrongKySLSX),
+
+
                     errorInventory: 0,
                     errorInventoryM3: 0,
                     errorInventoryBOM: 0,
                     errorInventoryCD: 0,
                     errorInventoryTotal: 0,
+
+
                     outwardInventory: Number(item.OutQty),
+                    outwardInventoryLSX: Number(item.OutQtySX),
                     outwardInventoryM3: Number(item.OutQtyM3),
+                    outwardInventoryM3LSX: Number(item.OutQtyM3SX),
                     outwardInventoryBOM: Number(item.BOM_CD_XuatTrongKySL),
+                    outwardInventoryBOMLSX: Number(item.BOM_CD_XuatTrongKySLSX),
                     outwardInventoryCD: Number(item.CD_XuatTrongKySL),
+                    outwardInventoryCDLSX: Number(item.CD_XuatTrongKySLSX),
                     outwardInventoryTotal: Number(item.Total_XuatTrongKySL),
+                    outwardInventoryTotalLSX: Number(item.Total_XuatTrongKySLSX),
+
+
                     closingInventory: Number(item.TonCuoiKy),
                     closingInventoryM3: Number(item.TonCuoiKyM3),
                     closingInventoryBOM: Number(item.BOM_CD_TonCuoiKySL),
