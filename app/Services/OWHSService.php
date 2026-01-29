@@ -16,7 +16,7 @@ class OWHSService
     private $SQL_GET_WH_SL_BY_FACTORY = 'SELECT "WhsCode", "WhsName", "U_FAC" FROM OWHS where "U_Flag" = ? AND "U_FAC" = ?';
     private $SQL_GET_WH_QC_FACTORY = 'SELECT "WhsCode", "WhsName", "U_FAC" FROM OWHS where "U_Flag" = ? AND "U_FAC" = ?';
     private $SQL_GET_WH_HT_CBG = <<<SQL
-        SELECT "WhsCode", "WhsName" FROM OWHS WHERE "U_KHOI" = 'CBG' AND "U_CDOAN" = 'HT' AND "U_FAC" = ?
+        SELECT "WhsCode", "WhsName" FROM OWHS WHERE "U_KHOI" = 'CBG' AND "U_CDOAN" = 'HT' AND "U_FAC" = ? AND "Inactive" = 'N'
     SQL;
 
     public function __construct(HanaService $hanaService)
