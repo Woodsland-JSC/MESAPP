@@ -1409,35 +1409,11 @@ class ReportController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
 
-        // $conDB = (new ConnectController)->connect_sap();
-        // $query = 'CALL USP_StockBy_SPDICH_CDOAN_VCN(?, ?, ?, ?, ?)';
-
-        // $stmt = odbc_prepare($conDB, $query);
-        // if (!$stmt) {
-        //     throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
-        // }
-
-
-
-        // if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $request->factory, $request->type, $defaultParam])) {
-        //     throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-        // }
-
-        // $results = array();
-        // while ($row = odbc_fetch_array($stmt)) {
-        //     $results[] = $row;
-        // }
-
-        // odbc_close($conDB);
-
-        $defaultParam = null;
-
-        $results = $hanaService->select('CALL USP_StockBy_SPDICH_CDOAN_VCN(?, ?, ?, ?, ?)', [
+        $results = $hanaService->select('CALL USP_StockBy_SPDICH_CDOAN_VCN(?, ?, ?, ?)', [
             $request->fromDate,
             $request->toDate,
             $request->factory,
-            $request->type,
-            $defaultParam
+            $request->type
         ]);
 
         return $results;
