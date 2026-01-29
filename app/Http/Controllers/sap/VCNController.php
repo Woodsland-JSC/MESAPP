@@ -2586,6 +2586,7 @@ class VCNController extends Controller
                         "CostingCode" => "VCN",
                         "CostingCode4" => "Default",
                         "WarehouseCode" => $whs,
+                        "ItemCode" => $allocate['ItemChild'],
                         "BatchNumbers" => [
                             [
                                 "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
@@ -3130,7 +3131,7 @@ class VCNController extends Controller
             'ItemCode' => 'required',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
 
         $loailoi = $request->loailoi['label'] ?? '';
@@ -3138,8 +3139,9 @@ class VCNController extends Controller
         $teamBack = $request->teamBack['value'] ?? '';
         $rootCause = $request->rootCause['value'] ?? '';
         $subCode = $request->subCode['value'] ?? '';
-        //check kho QC
+
         $whs = $this->getQCWarehouseByUser('NG');
+
         if ($whs == -1) {
             return response()->json([
                 'error' => false,
@@ -3149,11 +3151,13 @@ class VCNController extends Controller
         }
 
         try {
+            DB::beginTransaction();
             $data = notireceiptVCN::where('id', $request->id)->where('deleted', '=', 0)->where('type', '=', 1)->first();
+
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
-            // check xem item đó số lượng qty có lớn hơn số lượng openQty không và openQty >0
+
             $ctrong = ChiTietRong::where('baseID', $request->id)->where('type', '=', 1)
                 ->where('openQty', '>=', $request->Qty)->first();
 
@@ -3162,8 +3166,9 @@ class VCNController extends Controller
             }
             $U_GIAO = DB::table('users')->where('id', $data->CreatedBy)->first();
             $stockissue = null;
-            // kiểm tra xem lệnh này có ghi nhận sản lượng không nếu không thì tạo issue đồng thời check xem đã issue chưa. tài vì chỉ issue 1 lần.
+            
             $receipt = ChiTietRong::where('baseID', $request->id)->where('type', '=', 0)->get();
+
             if ($receipt->count() == 0) {
                 if ($data->isQCConfirmed == 0) {
                     $dataissueRong = $this->collecteEntryIssueRong($data->FatherCode, $data->team, $data->version, $data->LSX);
@@ -3182,11 +3187,11 @@ class VCNController extends Controller
                     foreach ($dataAllocateIssue as $allocate) {
                         $string .= $allocate['DocEntry'] . '-' . $allocate['Allocated'] . ';';
                     }
-                    //                    $stockissue = $this->collectStockAllocate($string, $request->id);
-                    $stockissue = null; // yêu cầu không cần gửi stock issue item manual nữa
+                    
+                    $stockissue = null; 
                 };
             }
-            // if( )
+
             $dataallocate = $this->collectdatadetailrong($data->FatherCode, $ctrong->ItemCode, $data->team, $data->version, $data->LSX);
 
             if (count($dataallocate) == 0) {
@@ -3201,6 +3206,7 @@ class VCNController extends Controller
             }
 
             $newAllocates = $this->allocatedIssueRong($dataallocate, $request->Qty);
+
             if (count($newAllocates) == 0) {
                 return response()->json([
                     'error' => false,
@@ -3211,6 +3217,7 @@ class VCNController extends Controller
                         $data->FatherCode . " LSX." . $data->LSX
                 ], 500);
             }
+
             foreach ($newAllocates as $allocate) {
                 $dataReceipt[]  = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
@@ -3229,11 +3236,14 @@ class VCNController extends Controller
                     "DocumentLines" => [[
                         "Quantity" => $allocate['Allocated'],
                         "TransactionType" => "R",
-                        "BaseEntry" => $allocate['DocEntry'],
-                        "BaseType" => 202,
+                        "U_BaseEntry" => $allocate['DocEntry'],
+                        "U_BaseLine" => $allocate['LineNum'],
+                        "U_BaseType" => 202,
                         "CostingCode" => "VCN",
                         "CostingCode4" => "Default",
                         "WarehouseCode" => $whs,
+                        "ItemCode" => $allocate['ItemCode'],
+                        "U_FItemCode" => "RONG",
                         "BatchNumbers" => [
                             [
                                 "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
@@ -3250,29 +3260,28 @@ class VCNController extends Controller
                     ]]
                 ];
 
-                historySLVCN::create(
-                    [
-                        'itemchild' => $allocate['ItemCode'],
-                        'SPDich' => $data->FatherCode,
-                        'to' => $data->Team,
-                        "source" => $rootCause,
-                        "TOChuyenVe" => $teamBack,
-                        'quantity' => $allocate['Allocated'],
-                        'ObjType' => 202,
-                        'DocEntry' => "",
-                        'subCode' => "",
-                        'notiId' => $request->id,
-                        'LL' => $loailoi,
-                        'HXL' => $huongxuly
-                    ]
-                );
+                historySLVCN::create([
+                    'itemchild' => $allocate['ItemCode'],
+                    'SPDich' => $data->FatherCode,
+                    'to' => $data->Team,
+                    "source" => $rootCause,
+                    "TOChuyenVe" => $teamBack,
+                    'quantity' => $allocate['Allocated'],
+                    'ObjType' => 202,
+                    'DocEntry' => "",
+                    'subCode' => "",
+                    'notiId' => $request->id,
+                    'LL' => $loailoi,
+                    'HXL' => $huongxuly
+                ]);
             }
+
             $dataSendPayload = [
                 'InventoryGenEntries' => $dataReceipt,
                 'InventoryGenExits' => $stockissue
             ];
 
-            $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload.
+            $payload = playloadBatch($dataSendPayload); 
             $client = new Client();
             $response = $client->request('POST', UrlSAPServiceLayer() . '/b1s/v1/$batch', [
                 'verify' => false,
@@ -3281,7 +3290,7 @@ class VCNController extends Controller
                     'Content-Type' => 'multipart/mixed;boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77c_' . $payload['uid'],
                     'Authorization' => 'Basic ' . BasicAuthToken(),
                 ],
-                'body' => $payload['payload'], // Đảm bảo $pl được định dạng đúng cách với boundary
+                'body' => $payload['payload'],
             ]);
             if ($response->getStatusCode() == 400) {
                 throw new \Exception('SAP ERROR Incomplete batch request body.');
@@ -3294,17 +3303,18 @@ class VCNController extends Controller
             }
             if ($response->getStatusCode() == 202) {
                 $res = $response->getBody()->getContents();
-                // kiểm tra sussess hay faild hơi quăng nha
                 if (strpos($res, 'ETag') !== false) {
                     notireceiptVCN::where('id', $request->id)->update([
                         'confirm' => 1,
                         'confirmBy' => Auth::user()->id,
                         'isQCConfirmed' => 1,
-                        'confirm_at' => Carbon::now()->format('YmdHis')
+                        'confirm_at' => Carbon::now()->format('YmdHis'),
+                        'openQty' => $data->openQty - $request->Qty
                     ]);
                     ChiTietRong::where('baseID', $request->id)->where('ItemCode', $request->ItemCode)->where('type', 1)->update([
                         'openQty' => $ctrong->openQty - $request->Qty
                     ]);
+
                     DB::commit();
                 } else {
                     preg_match('/\{.*\}/s', $res, $matches);
