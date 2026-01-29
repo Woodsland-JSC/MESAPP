@@ -65,8 +65,8 @@ class InventoryPostingController extends Controller
                     "ItemCode" => $item["ItemCode"],
                     "WarehouseCode" => $item["WhsCode"],
                     "CountedQuantity" => (float)$item["quantity"],
-                    "UoMCode" => $item["UomCode"],
-                    "OcrCode4" => $team
+                    "CostingCode4" => $team,
+                    "UoMCode" => $item["UomCode"]
                 ];
             }
 
