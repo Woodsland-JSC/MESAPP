@@ -24,6 +24,11 @@ class ORSCService
         JOIN RSC1 ON RSC1."ResCode" = ORSC."VisResCode"
         WHERE "U_QC"='N' AND "validFor"='Y' AND "U_FAC"=? AND "U_KHOI"='CBG';
     SQL;
+    private $SQL_GET_TEAM_CDOAN_HT = <<<SQL
+        select ORSC."VisResCode" "Code", 
+        ORSC."ResName" "Name",
+        ORSC."U_CDOAN" "CDOAN" from ORSC where "U_CDOAN" = 'HT' AND "U_FAC"= ? AND "validFor"='Y'
+    SQL;
 
     public function __construct(HanaService $hanaService)
     {
@@ -47,6 +52,14 @@ class ORSCService
         } catch (\Throwable $th) {
             Log::error('ORSCService::getTeamProductionByFactory', $th->getMessage());
             throw $th;
+        }
+    }
+
+    public function getTeamCdoanHT($factory){
+        try {
+            return $this->hanaService->select($this->SQL_GET_TEAM_CDOAN_HT, [$factory]);
+        } catch (\Throwable $th) {
+            throw new Exception($th->getMessage());
         }
     }
 }

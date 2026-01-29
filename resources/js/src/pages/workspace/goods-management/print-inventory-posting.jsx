@@ -26,6 +26,7 @@ import {
 } from "@chakra-ui/react";
 import { inventoryPostingItems } from "../../../api/inventory-posting.api";
 import Swal from "sweetalert2";
+import {getTeamCdoanHT} from "../../../api/ORSCApi";
 
 const PrintInventoryPosting = () => {
     const { user } = useAppContext();
@@ -37,6 +38,8 @@ const PrintInventoryPosting = () => {
     const [warehouses, setWarehouses] = useState([]);
     const [warehouse, setWarehouse] = useState(null);
     const [items, setItems] = useState([]);
+    const [teams, setTeams] = useState([]);
+    const [team, setTeam] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const [gridApi, setGridApi] = useState(null);
@@ -119,6 +122,11 @@ const PrintInventoryPosting = () => {
             return
         }
 
+        if(!team){
+            toast.error("Vui lòng chọn tổ.");
+            return;
+        }
+
         setData(rows);
         setItems(current);
         onOpen();
@@ -134,7 +142,8 @@ const PrintInventoryPosting = () => {
             setIsLoading(true);
             await inventoryPostingItems({
                 data: data,
-                whCode: warehouse.value
+                whCode: warehouse.value,
+                team: team.value
             });
 
             getItems();
@@ -293,12 +302,29 @@ const PrintInventoryPosting = () => {
         }
     }
 
+    const getTeamsHT = async (factory) => {
+        try {
+            let res = await getTeamCdoanHT(factory);
+            setTeams(res.map(team => (
+                {
+                    label: `${team.Name}`,
+                    value: team.Code
+                }
+            )))
+        } catch (error) {
+            toast.error('Lấy danh sách tổ có lỗi.');
+        }
+    }
+
     useEffect(() => {
         if (warehouse) getItems();
     }, [warehouse])
 
     useEffect(() => {
         getWarehouses();
+        if(factory){
+            getTeamsHT(factory.value)
+        }
     }, [factory])
 
     useEffect(() => {
@@ -339,7 +365,7 @@ const PrintInventoryPosting = () => {
                     <div className="flex justify-between bg-white mb-4 p-4 pt-3">
                         <div className="w-[75%] flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-4 lg:space-x-4 md:space-x-4 space-x-0  rounded-xl  gap-x-2 gap-y-2 items-center">
                             {user?.role == 1 && (
-                                <div className="md:w-1/2 w-full">
+                                <div className="md:w-1/3 w-full">
                                     <label className=" text-sm font-medium text-gray-900">
                                         Nhà máy
                                     </label>
@@ -353,7 +379,7 @@ const PrintInventoryPosting = () => {
                                     />
                                 </div>
                             )}
-                            <div className="md:w-1/2 w-full">
+                            <div className="md:w-1/3 w-full">
                                 <label className=" text-sm font-medium text-gray-900">
                                     Kho
                                 </label>
@@ -363,6 +389,19 @@ const PrintInventoryPosting = () => {
                                     className="w-full mt-2 cursor-pointer"
                                     onChange={(warehouse) => {
                                         setWarehouse(warehouse);
+                                    }}
+                                />
+                            </div>
+                            <div className="md:w-1/3 w-full">
+                                <label className=" text-sm font-medium text-gray-900">
+                                    Tổ
+                                </label>
+                                <Select
+                                    options={teams}
+                                    placeholder="Chọn tổ"
+                                    className="w-full mt-2 cursor-pointer"
+                                    onChange={(team) => {
+                                        setTeam(team);
                                     }}
                                 />
                             </div>
@@ -474,7 +513,7 @@ const PrintInventoryPosting = () => {
                 <AlertDialogOverlay>
                     <AlertDialogContent>
                         <AlertDialogHeader fontSize='md' fontWeight='bold'>
-                            Xác nhận kiểm kê kho {`${warehouse?.label} - ${warehouse?.value}`}
+                            Xác nhận kiểm kê kho {`${warehouse?.label} - ${warehouse?.value}`} (Tổ {team?.label} - {team?.value})
                         </AlertDialogHeader>
 
                         <AlertDialogBody>

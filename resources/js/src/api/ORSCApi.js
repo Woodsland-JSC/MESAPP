@@ -19,3 +19,12 @@ export const getTeamProductionByFactory = (factory) => {
         }
     });
 }
+
+export const getTeamCdoanHT = (factory) => {
+    const url = `${BASEURL}/getTeamCdoanHT`;
+    return axiosClient().get(url, {
+        params: {
+            factory
+        }
+    });
+}
