@@ -180,11 +180,17 @@ const PrintInventoryPosting = () => {
                     return
                 }
 
+                if(!team){
+                    toast.error("Vui lòng chọn tổ.");
+                    return;
+                }
+
                 try {
                     setIsLoading(true);
                     await inventoryPostingItems({
                         data: rows,
-                        whCode: warehouse.value
+                        whCode: warehouse.value,
+                        team: team.value
                     });
 
                     getItems();
