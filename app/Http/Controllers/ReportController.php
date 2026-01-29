@@ -1409,11 +1409,14 @@ class ReportController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
 
-        $results = $hanaService->select('CALL USP_StockBy_SPDICH_CDOAN_VCN(?, ?, ?, ?)', [
+        $outParam = null;
+
+        $results = $hanaService->select('CALL USP_StockBy_SPDICH_CDOAN_VCN(?, ?, ?, ?, ?)', [
             $request->fromDate,
             $request->toDate,
             $request->factory,
-            $request->type
+            $request->type,
+            $outParam
         ]);
 
         return $results;
