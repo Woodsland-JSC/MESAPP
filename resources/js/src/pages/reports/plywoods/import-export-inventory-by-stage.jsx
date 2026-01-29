@@ -287,7 +287,7 @@ function ImportExportInventoryByStage() {
                                 if (params.api && params.api.getDisplayedRowAtIndex) {
                                     const firstDataRow = params.api.getDisplayedRowAtIndex(0).allLeafChildren[0];
                                     if (firstDataRow && firstDataRow.data) {
-                                        return firstDataRow.data?.inwardInventoryLSX ?? 0;
+                                        return firstDataRow.data?.inwardInventoryTotalLSX ?? 0;
                                     }
                                 }
                                 return 0;
@@ -390,7 +390,7 @@ function ImportExportInventoryByStage() {
                                 if (params.api && params.api.getDisplayedRowAtIndex) {
                                     const firstDataRow = params.api.getDisplayedRowAtIndex(0).allLeafChildren[0];
                                     if (firstDataRow && firstDataRow.data) {
-                                        return firstDataRow.data?.outwardInventoryLSX ?? 0;
+                                        return firstDataRow.data?.outwardInventoryTotalLSX ?? 0;
                                     }
                                 }
                                 return 0;
@@ -621,9 +621,9 @@ function ImportExportInventoryByStage() {
 
 
                     inwardInventory: Number(item.InQty),
-                    inwardInventorySX: Number(item.InQtySX),
+                    inwardInventoryLSX: Number(item.InQtySX),
                     inwardInventoryM3: Number(item.InQtyM3),
-                    inwardInventoryM3SX: Number(item.InQtyM3SX),
+                    inwardInventoryM3LSX: Number(item.InQtyM3SX),
                     inwardInventoryBom: Number(item.BOM_CD_NhapTrongKySL),
                     inwardInventoryBomLSX: Number(item.BOM_CD_NhapTrongKySLSX),
                     inwardInventoryCD: Number(item.CD_NhapTrongKySL),
