@@ -22,6 +22,7 @@ class historySLVCN extends Model
         'isQualityCheck',
         'notiId',
         'subCode',
-        
+        'source',
+        'TOChuyenVe'
     ];
 }

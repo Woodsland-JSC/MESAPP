@@ -297,6 +297,7 @@ class VcnController extends Controller
                     'disassembly_order.created_at',
                     DB::raw("CONCAT(u.first_name, ' ', u.last_name) as created_by")
                 )
+                ->orderBy('disassembly_order.created_at', 'desc')
                 ->get();
 
             $totalDisassemblyQty = $disassemblyOrder->sum('Qty');
@@ -388,6 +389,7 @@ class VcnController extends Controller
                     'Type',
                     'fullname',
                 )
+                ->orderBy('notireceiptVCN.created_at', 'desc')
                 ->get()
                 ->groupBy('id')
                 ->map(function ($items, $id) {
@@ -400,6 +402,7 @@ class VcnController extends Controller
                             'ItemName' => $firstItem->DetectItemName,
                             'confirm' => $firstItem->confirm,
                             'Type' => $firstItem->Type,
+                            'ItemCode' => $firstItem->ItemCode,
                         ];
                     } else { // Type = 0
                         return [
@@ -421,7 +424,6 @@ class VcnController extends Controller
                 })
                 ->values();
 
-            // Cấu trúc lại dữ liệu theo yêu cầu
             $notiWithDisassemblyOrder = $disassemblyOrder->map(function ($order) use ($notification) {
                 return [
                     'id' => $order->id,
@@ -440,7 +442,6 @@ class VcnController extends Controller
                 'FatherStock' => $TotalFather,
                 'stocks' => $chiTietSLRong,
                 'Factorys' => $factory,
-                // 'notifications' => $notification,
                 'disassemblyOrders' => $notiWithDisassemblyOrder
             ], 200);
         } catch (\Exception $e) {

@@ -837,6 +837,18 @@ const ItemInput = ({
     function transformDetail(details, type) {
         const result = [];
 
+        if(type == 1){
+            result.push({
+                ItemCode: details.ItemCode,
+                ItemName: details.ItemName,
+                Qty_Type1: details.Quantity || 0,
+            })
+
+            return result;
+        }
+
+        
+
         details?.forEach((item) => {
             let existingItem = result.find(
                 (detail) =>
@@ -2326,7 +2338,7 @@ const ItemInput = ({
                                                                                                 {/* Lỗi */}
                                                                                                 <div className="">
                                                                                                     {transformDetail(
-                                                                                                        item?.detail,
+                                                                                                        item,
                                                                                                         item?.Type
                                                                                                     ).map(
                                                                                                         (
@@ -2349,27 +2361,6 @@ const ItemInput = ({
                                                                                                                         ) ||
                                                                                                                             0}
                                                                                                                     </div>
-                                                                                                                </div>
-
-                                                                                                                <div className="flex items-center gap-x-6">
-                                                                                                                    {/* <button
-                                                                                                                    onClick={() => {
-                                                                                                                        onDeleteProcessingDialogOpen();
-                                                                                                                        console.log(
-                                                                                                                            "Id Noti bị xóa:",
-                                                                                                                            item?.notiID
-                                                                                                                        );
-                                                                                                                        setSelectedDelete(
-                                                                                                                            item?.notiID
-                                                                                                                        );
-                                                                                                                        setDialogType(
-                                                                                                                            "product"
-                                                                                                                        );
-                                                                                                                    }}
-                                                                                                                    className="flex text-white text-sm rounded-full duration-200 ease bg-black hover:bg-red-700 p-1.5"
-                                                                                                                >
-                                                                                                                    <TbPencil className="text-white text-2xl h-fit" />
-                                                                                                                </button> */}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                         )
@@ -3470,7 +3461,11 @@ const ItemInput = ({
                                     <button
                                         className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
                                         type="button"
-                                        onClick={onAlertDialogOpen}
+                                        onClick={() => {
+                                            onAlertDialogOpen();
+                                            rongData.filter(item => console.log(item)
+                                            )
+                                        }}
                                     >
                                         Xác nhận
                                     </button>
@@ -3624,7 +3619,7 @@ const ItemInput = ({
                         </AlertDialogBody>
                         <AlertDialogFooter className="gap-4">
                             <Button onClick={onAlertDialogClose}>Hủy bỏ</Button>
-                            {(amount || faultyAmount || (RONGInputQty && rongData)) && (
+                            {(amount || faultyAmount || (RONGInputQty && rongData) ) && (
                                 <button
                                     disabled={confirmLoading}
                                     className="w-fit bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
