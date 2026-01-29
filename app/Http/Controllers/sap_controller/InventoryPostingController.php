@@ -39,9 +39,9 @@ class InventoryPostingController extends Controller
             $today = date("ymd");
 
             $postingData = [
-                "PostingDate" => Carbon::now()->format('Y-m-d'),
+                "CountDate" => Carbon::now()->format('Y-m-d'),
                 "Remarks" => "Kiểm kê kho " . $whCode . " " .  $today,
-                "InventoryPostingLines" => [],
+                "InventoryCountingLines" => [],
                 "BranchID" => Auth::user()->branch
             ];
 
@@ -53,13 +53,12 @@ class InventoryPostingController extends Controller
                     "WarehouseCode" => $item["WhsCode"],
                     "CountedQuantity" => (float)$item["quantity"],
                     "UoMCode" => $item["UomCode"]
-                    // "Quantity" => (float)$item["OnHand"]
                 ];
             }
 
-            $postingData['InventoryPostingLines'] = $lines;
+            $postingData['InventoryCountingLines'] = $lines;
 
-            $response = $this->sapB1Service->post($postingData, 'InventoryPostings');
+            $response = $this->sapB1Service->post($postingData, 'InventoryCountings');
 
             if (!$response->successful()) {
                 Log::info($response->json());
@@ -73,7 +72,7 @@ class InventoryPostingController extends Controller
                 'data' => $response->json()
             ], 200);
         } catch (Exception $e) {
-            Log::info("InventoryPostingController::inventoryPostingItems - " . $e->getMessage());
+            Log::info("InventoryCountingController::InventoryCountingItems - " . $e->getMessage());
             return response()->json([
                 'message' => 'Điều chỉnh tồn có lỗi.'
             ], 500);
