@@ -2586,7 +2586,6 @@ class VCNController extends Controller
                         "CostingCode" => "VCN",
                         "CostingCode4" => "Default",
                         "WarehouseCode" => $whs,
-                        "ItemCode" => $allocate['ItemChild'],
                         "BatchNumbers" => [
                             [
                                 "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
