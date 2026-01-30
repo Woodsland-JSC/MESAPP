@@ -168,13 +168,13 @@ const CBGReports = [
             "Khuyến nghị số lượng bán thành phẩm cần bổ sung để xử lý lỗi.",
         // priority: true,
     },
-    // {
-    //     id: "0005",
-    //     name: "Báo cáo lệnh sản xuất đang thực hiện",
-    //     link: "/reports/wood-working/wip-production-order",
-    //     description: "Báo các các lệnh sản xuất đang thực hiện bao gồm cả các lệnh đã quá hạn.",
-    //     priority: true,
-    // },
+    {
+        id: "0005",
+        name: "Báo cáo lệnh sản xuất đang thực hiện",
+        link: "/reports/wood-working/wip-production-order",
+        description: "Báo các các lệnh sản xuất đang thực hiện bao gồm cả các lệnh đã quá hạn.",
+        // priority: true,
+    },
     {
         id: "0006",
         name: "Báo cáo sản lượng theo ngày/tuần/tháng",
