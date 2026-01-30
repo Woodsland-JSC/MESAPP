@@ -304,7 +304,7 @@ function WipProductionOrderReport() {
     useEffect(() => {
         const getAllGroupWithoutQC = async () => {
             const KHOI = "CBG";
-            const factory = selectedFactory?.value || null;
+            const factory = selectedFactory?.value || user?.plant;
             setLoading(true);
             try {
                 const res = await productionApi.getAllGroupWithoutQC(factory, KHOI);
