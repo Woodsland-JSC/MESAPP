@@ -36,63 +36,24 @@ import { Bar } from 'react-chartjs-2';
 import debounce from "../../../utils/debounce";
 
 import useAppContext from "../../../store/AppContext";
-
-const getRandomInt = (min, max) => {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-const getRandomFloat = (min, max, precision = 2) => {
-    const factor = Math.pow(10, precision);
-    return Math.floor(Math.random() * (max - min + 1) * factor) / factor;
-};
-
-const getRandomElement = (array) => {
-    return array[Math.floor(Math.random() * array.length)];
-};
-
-const generateFakeData = (numRecords = 100) => {
-    const stages = ['1. Xếp ván PLY (YS3)', '2. Tạo Ván', '3. Hoàn thiện', '4. Kho thành phẩm'];
-    const products = ['NACKANĀS chair acacia (TP)', 'Plywood xoan đào', 'Oak wood panel', 'Maple wood board'];
-    const names = ['NACKANĀS Ghế - Tựa lưng', 'NACKANĀS Ghế - Chân sau', 'Plywood - Tấm lớn', 'Oak Panel - Tấm nhỏ'];
-    const data = [];
-
-    for (let i = 0; i < numRecords; i++) {
-        const stage = getRandomElement(stages);
-        const product = getRandomElement(products);
-        const name = getRandomElement(names);
-
-        data.push({
-            productionOrder: `TH${getRandomInt(1000, 9999)}TP-${getRandomInt(1, 99)}`,
-            stage: stage,
-            product: product,
-            barcode: getRandomInt(10000000, 99999999).toString(),
-            id: getRandomInt(100000, 999999).toString(),
-            name: name,
-            height: getRandomInt(10, 50),
-            width: getRandomInt(100, 1000),
-            length: getRandomInt(100, 1000),
-            plannedQuantity: getRandomInt(1000, 5000),
-            completedQuantity: getRandomInt(0, 5000),
-            completedArea: getRandomFloat(0, 10, 6),
-            remainingQuantity: getRandomInt(0, 5000),
-            remainingArea: getRandomFloat(0, 10, 6),
-            completionRate: `${getRandomFloat(0, 100, 2).toFixed(2)}%`
-        });
-    }
-
-    return data;
-};
+import Select from "react-select";
+import productionApi from "../../../api/productionApi";
+import usersApi from "../../../api/userApi";
 
 function WipProductionOrderReport() {
     const navigate = useNavigate();
 
     const { user } = useAppContext();
     const gridRef = useRef();
-
-    const [selectedFactory, setSelectedFactory] = useState(null);
     const [keyword, setKeyword] = useState("");
-    const [isDataReportLoading, setIsDataReportLoading] = useState(false);
-    const [rowData, setRowData] = useState(generateFakeData(100));
+    const [factories, setFactories] = useState([]);
+    const [selectedFactory, setSelectedFactory] = useState(null);
+    const [groupListOptions, setGroupListOptions] = useState([]);
+    const [selectedGroup, setSelectedGroup] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [loadingData, setLoadingData] = useState(false);
+    const [groupList, setGroupList] = useState([]);
+    const [data, setData] = useState([]);
 
     const updateColumnDefs = (colDefs) => {
         return colDefs.map(colDef => {
@@ -105,69 +66,77 @@ function WipProductionOrderReport() {
 
     const colDefs = useMemo(() => updateColumnDefs([
         {
-            field: 'productionOrder',
-            headerName: 'Lệnh sản xuất',
+            field: 'NameSPDich',
+            headerName: 'Tên sản phẩm',
             rowGroup: true,
-            enableRowGroup: true,
-            hide: true
+            filter: true
         },
         {
-            field: 'stage',
+            field: 'ChildName',
+            headerName: 'Chi tiết',
+            filter: true
+        },
+        {
+            field: 'NameTOTT',
             headerName: 'Công đoạn',
-            rowGroup: true,
-            enableRowGroup: true,
-            hide: true
+            filter: true
         },
         {
-            field: 'product',
-            headerName: 'Sản phẩm',
-            rowGroup: true,
-            enableRowGroup: true,
-            hide: true
+            field: 'LSX',
+            headerName: 'Lệnh sản xuất',
+            filter: true
         },
         {
-            field: 'barcode',
-            headerName: '(Bar code của Sản phẩm đích) Mã sản phẩm',
-            minWidth: 200
-        },
-        { field: 'id', headerName: 'ID' },
-        { field: 'name', headerName: 'Tên' },
-        {
-            headerName: 'Qui cách',
+            headerName: 'Quy cách',
             children: [
-                { field: 'height', headerName: 'Dày' },
-                { field: 'width', headerName: 'Rộng' },
-                { field: 'length', headerName: 'Dài' },
+                { field: 'CDay', headerName: 'Dày', filter: true },
+                { field: 'CRong', headerName: 'Rộng', filter: true },
+                { field: 'CDai', headerName: 'Dài', filter: true },
             ]
         },
         {
-            field: 'plannedQuantity',
-            headerName: 'Số lượng cần thực hiện',
-            type: 'numericColumn'
+            field: 'SanLuong',
+            headerName: 'Sản lượng',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                return params.value ? Number(params.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }) : 0
+            }
         },
         {
-            field: 'completedQuantity',
-            headerName: 'Số lượng đã thực hiện',
-            type: 'numericColumn'
+            field: 'DaLam',
+            headerName: 'Đã làm',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                return params.value ? Number(params.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }) : 0
+            }
         },
         {
-            field: 'completedArea',
-            headerName: 'M³ đã thực hiện',
-            type: 'numericColumn'
+            field: 'Loi',
+            headerName: 'Lỗi',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                return params.value ? Number(params.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }) : 0
+            }
         },
         {
-            field: 'remainingQuantity',
-            headerName: 'Số lượng còn phải thực hiện',
-            type: 'numericColumn'
-        },
-        {
-            field: 'remainingArea',
-            headerName: 'M³ còn phải thực hiện',
-            type: 'numericColumn'
-        },
-        {
-            field: 'completionRate',
-            headerName: 'Tỉ lệ thực hiện'
+            field: 'ConLai',
+            headerName: 'Còn lại',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                return params.value ? Number(params.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }) : 0
+            }
         },
     ]), []);
 
@@ -195,7 +164,7 @@ function WipProductionOrderReport() {
         },
     ];
 
-    const [reportData, setReportData] = useState(generateFakeData(100));
+    const [reportData, setReportData] = useState([]);
 
     const getRowStyle = (params) => {
         if (params.node.rowPinned) {
@@ -206,42 +175,6 @@ function WipProductionOrderReport() {
         }
         return null;
     };
-
-    const handleFactorySelect = async (factory) => {
-        setSelectedFactory(factory);
-        // Logic lấy theo factory
-        const pickRandomRows = (data, n) => {
-            const shuffled = data.sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, n);
-        };
-
-        const randomRows = pickRandomRows(reportData, 3);
-        setRowData(randomRows);
-    };
-
-    const FactoryOption = ({ value, label }) => (
-        <div
-            className={`group hover:border-[#1d2326] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedFactory === value
-                ? "border-[#86ABBE] bg-[#eaf8ff]"
-                : "border-gray-300"
-                }`}
-            onClick={() => handleFactorySelect(value)}
-        >
-            {selectedFactory === value ? (
-                <IoMdRadioButtonOn className="w-5 h-6 text-[#17506B]" />
-            ) : (
-                <IoMdRadioButtonOff className="w-5 h-6 text-gray-400 group-hover:text-[#17506B]" />
-            )}
-            <div
-                className={`${selectedFactory === value
-                    ? "text-[#17506B] font-medium"
-                    : "text-gray-400 group-hover:text-[#17506B]"
-                    }`}
-            >
-                {label}
-            </div>
-        </div>
-    );
 
     const handleResetFilter = () => {
         setSelectedFactory(null);
@@ -283,9 +216,121 @@ function WipProductionOrderReport() {
         }
     }
 
+    const getDataFollowingGroup = async () => {
+        setLoadingData(true);
+        try {
+            let params = {
+                TO: selectedGroup?.value,
+                CongDoan: selectedGroup?.CongDoan,
+            }
+            const res = await productionApi.getFinishedGoodsList(params);
+            if (typeof res?.data === "object") {
+                let data = [];
+                Object.values(res.data).forEach(item => {
+                    item?.Details.forEach(detail => {
+                        detail?.LSX.forEach(lsx => {
+                            data.push({
+                                SPDICH: item.SPDICH,
+                                NameSPDich: item.NameSPDich,
+                                ItemChild: detail.ItemChild,
+                                ChildName: detail.ChildName,
+                                CDay: detail.CDay,
+                                CRong: detail.CRong,
+                                CDai: detail.CDai,
+                                LSX: lsx.LSX,
+                                SanLuong: Number(lsx.SanLuong),
+                                DaLam: Number(lsx.DaLam),
+                                Loi: Number(lsx.Loi),
+                                ConLai: Number(lsx.ConLai),
+                                TO: detail.TO,
+                                NameTo: detail.NameTo,
+                                TOTT: detail.TOTT,
+                                NameTOTT: detail.NameTOTT
+                            });
+                        });
+                    });
+                })
+                setData(data);
+            } else {
+                setData([]);
+            }
+        } catch (error) {
+            console.log("Error fetching data: ", error);
+
+            toast.error("Có lỗi trong quá trình lấy dữ liệu.");
+        }
+        setLoadingData(false);
+    };
+
+    useEffect(() => {
+        if (selectedGroup) {
+            const isQC = groupList.find(
+                (group) => group.Code == selectedGroup.value
+            )?.QC;
+            if (!isQC) {
+                getDataFollowingGroup();
+            }
+        }
+    }, [selectedGroup]);
+
+    useEffect(() => {
+        const selectedBranch = user?.branch;
+        const selectedDimension = "CBG";
+
+        const getFactoriesByBranchId = async () => {
+            try {
+                if (selectedBranch) {
+                    setFactories([]);
+                    const res = await usersApi.getFactoriesByBranchId(
+                        selectedBranch, selectedDimension
+                    );
+
+                    const options = res.map((item) => ({
+                        value: item.Code,
+                        label: item.Name,
+                    }));
+
+                    setFactories(options);
+                } else {
+                    setFactories([]);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        getFactoriesByBranchId();
+    }, []);
+
+    useEffect(() => {
+        const getAllGroupWithoutQC = async () => {
+            const KHOI = "CBG";
+            const factory = selectedFactory?.value || null;
+            setLoading(true);
+            try {
+                const res = await productionApi.getAllGroupWithoutQC(factory, KHOI);
+                const options = res.map((item) => ({
+                    value: item.Code,
+                    label: item.Name + " - " + item.Code,
+                    CongDoan: item.CongDoan,
+                    Factory: item.Factory,
+                }));
+                setGroupList(res);
+
+                options.sort((a, b) => a.label.localeCompare(b.label));
+                setGroupListOptions(options);
+            } catch (error) {
+                toast.error("Có lỗi xảy ra khi load danh sách tổ.");
+                console.error(error);
+            }
+            setLoading(false);
+        };
+        getAllGroupWithoutQC();
+    }, [selectedFactory]);
+
+
     return (
         <Layout>
-            <div className="overflow-x-hidden">
+            <div className="">
                 <div className="w-screen p-6 px-5 xl:p-5 xl:px-12 ">
                     {/* Title */}
                     <div className="flex flex-col tablet:flex-row items-center justify-between gap-3 mb-3.5">
@@ -344,49 +389,52 @@ function WipProductionOrderReport() {
                         </div>
                     </div>
 
-                    {/* Header */}
                     <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3">
-                        {/* Filter */}
                         <div className="flex flex-col lg:flex-row flex-wrap 2xl:flex-nowrap items-center px-4 mt-1 gap-3">
-                            <div className="flex flex-col lg:pl-3 w-full lg:w-[70%] 2xl:w-1/2 lg:border-l-2 lg:border-gray-100">
-                                <label
-                                    htmlFor="indate"
-                                    className="block mb-1 text-sm font-medium whitespace-nowrap text-gray-900"
-                                >
-                                    Chọn nhà máy
-                                </label>
-                                <div className="flex flex-col sm:flex-row gap-3">
-                                    <div className="col-span-1 w-full">
-                                        <FactoryOption
-                                            value="TH"
-                                            label="Thuận Hưng"
-                                        />
+                            <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-3 lg:space-x-3 md:space-x-3 space-x-0 w-full">
+                                {(user.role == 1) && (<div className="px-0 w-full">
+                                    <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900 ">
+                                        Nhà máy sản xuất
                                     </div>
-                                    <div className="col-span-1 w-full flex items-end">
-                                        <FactoryOption
-                                            value="YS"
-                                            label="Yên Sơn"
-                                        />
+                                    <Select
+                                        options={factories}
+                                        defaultValue={factories}
+                                        onChange={(value) => {
+                                            setSelectedFactory(value);
+                                            console.log("Selected factory: ", value);
+                                        }}
+                                        placeholder="Tìm kiếm"
+                                        className="mt-1 mb-3 w-full"
+                                    />
+                                </div>)}
+
+                                <div className="px-0 w-full">
+                                    <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900 ">
+                                        Tổ & Xưởng sản xuất
                                     </div>
-                                    <div className="col-span-1 w-full flex items-end">
-                                        <FactoryOption
-                                            value="TB"
-                                            label="Thái Bình"
-                                        />
-                                    </div>
+                                    <Select
+                                        options={groupListOptions}
+                                        defaultValue={selectedGroup}
+                                        onChange={(value) => {
+                                            setSelectedGroup(value);
+                                            console.log("Selected group: ", value);
+                                        }}
+                                        placeholder="Tìm kiếm theo tổ"
+                                        className="mt-1 mb-4 w-full "
+                                    />
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Content */}
-                    {isDataReportLoading ? (
+                    {loadingData ? (
                         <div className="mt-2 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
                             <div class="dots"></div>
                         </div>
                     ) : (
                         <>
-                            {rowData?.length > 0 ? (
+                            {data?.length > 0 ? (
                                 <div>
                                     <div
                                         className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2 "
@@ -394,13 +442,14 @@ function WipProductionOrderReport() {
                                             height: 630,
                                             fontSize: 16,
                                         }}
+                                        id="app-ag-grid"
                                     >
                                         <AgGridReact
                                             ref={gridRef}
-                                            rowData={generateFakeData()}
+                                            rowData={data}
                                             columnDefs={colDefs}
                                             autoGroupColumnDef={{
-                                                headerName: 'Nhóm'
+                                                headerName: 'Sản phẩm đích'
                                             }}
                                             rowGroupPanelShow={"always"}
                                             // groupDisplayType="groupRows"
@@ -408,6 +457,7 @@ function WipProductionOrderReport() {
                                             suppressAggFuncInHeader
                                             getRowStyle={getRowStyle}
                                             excelStyles={excelStyles}
+                                            grandTotalRow="bottom"
                                         />
                                     </div>
                                 </div>
