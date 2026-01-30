@@ -200,9 +200,9 @@ const PrintInventoryPosting = () => {
                     onCloseItem();
                     setRowSelected(null);
 
-                    toast.success("Điều chỉnh tồn thành công.");
+                    toast.success("Gửi phiếu Điều chỉnh tồn thành công.");
                 } catch (error) {
-                    toast.error("Điều chỉnh tồn có lỗi.");
+                    toast.error("Gửi phiếu Điều chỉnh tồn có lỗi.");
                     setIsLoading(false);
                 }
             }
