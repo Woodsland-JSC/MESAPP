@@ -2208,9 +2208,9 @@ function WoodSorting() {
             {loading && <Loader />}
 
             {
-                (user?.role == 1 && currentPalletCreated) && (
+                (user?.role == 1) && (
                     <Drawer
-                        isOpen={isOpenQR}
+                        isOpen={isOpenQR || true}
                         placement='bottom'
                         onClose={() => {
                             onCloseQR();
@@ -2220,7 +2220,7 @@ function WoodSorting() {
                     >
                         <DrawerOverlay />
                         <DrawerContent>
-                            <DrawerHeader fontSize={"2xl"}>{currentPalletCreated.code}</DrawerHeader>
+                            <DrawerHeader fontSize={"2xl"}>{currentPalletCreated?.code ?? "YS2544-00001"}</DrawerHeader>
 
                             <DrawerBody display="flex" maxH="fit-content" alignItems={"center"} justifyContent={"center"}>
                                 <PalletQrPrint flex={true} data={currentPalletCreated} />
