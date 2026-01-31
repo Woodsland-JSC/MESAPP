@@ -26,7 +26,7 @@ import {
 } from "@chakra-ui/react";
 import { inventoryPostingItems } from "../../../api/inventory-posting.api";
 import Swal from "sweetalert2";
-import {getTeamCdoanHT} from "../../../api/ORSCApi";
+import { getTeamCdoanHT } from "../../../api/ORSCApi";
 
 const PrintInventoryPosting = () => {
     const { user } = useAppContext();
@@ -122,7 +122,7 @@ const PrintInventoryPosting = () => {
             return
         }
 
-        if(!team){
+        if (!team) {
             toast.error("Vui lòng chọn tổ.");
             return;
         }
@@ -180,7 +180,7 @@ const PrintInventoryPosting = () => {
                     return
                 }
 
-                if(!team){
+                if (!team) {
                     toast.error("Vui lòng chọn tổ.");
                     return;
                 }
@@ -236,6 +236,12 @@ const PrintInventoryPosting = () => {
                 width: 300
             },
             {
+                headerName: "Đơn vị tính",
+                field: "UomCode",
+                filter: true,
+                width: 150
+            },
+            {
                 headerName: "Tồn trong kho",
                 field: "OnHand",
                 filter: true,
@@ -273,14 +279,14 @@ const PrintInventoryPosting = () => {
     }, [])
 
     const onConfirmAddItem = async () => {
-        if(itemAdded.code == '' || !itemAdded.code) {
+        if (itemAdded.code == '' || !itemAdded.code) {
             toast.error("Vui lòng nhập mã hoặc barcode vật tư.");
             return;
         }
 
         let item = items.find(i => i.CodeBars === itemAdded.code || i.ItemCode === itemAdded.code);
 
-        if(item) {
+        if (item) {
             toast.error("Mã vật tư đã có trong danh sách.");
             return;
         }
@@ -288,11 +294,11 @@ const PrintInventoryPosting = () => {
         try {
             const response = await findItemByWh(warehouse.value, itemAdded.code);
 
-            if(!response.data) {
+            if (!response.data) {
                 toast.error("Không tìm thấy mã vật tư.");
                 return
             }
-            
+
             let item = response.data;
             item.quantity = "";
             setItems([...items, item]);
@@ -331,7 +337,7 @@ const PrintInventoryPosting = () => {
     }, [factory])
 
     useEffect(() => {
-        if( warehouse){
+        if (warehouse) {
             getTeamsHT(factory ? factory.value : user?.plant, warehouse.value);
         }
     }, [warehouse])
@@ -483,7 +489,7 @@ const PrintInventoryPosting = () => {
                                                             </div>
                                                         </div>
                                                         <div className="text-gray-600 space-y-1 py-3 p-4 text-sm">
-                                                            <div className="">SL: {Number(item.OnHand)} ({item.IUoMEntry} {item.UomCode})</div>
+                                                            <div className="">SL: {Number(item.OnHand)} ({item.UomCode})</div>
                                                             <div className="">Mã: {item?.CodeBars}</div>
                                                         </div>
                                                         <div className="border border-t">
@@ -564,27 +570,50 @@ const PrintInventoryPosting = () => {
                         </AlertDialogHeader>
 
                         <AlertDialogBody>
-                            <div className="mb-2">
-                                <span>Tồn trong kho</span>
-                                <NumberInput
-                                    className="bg-gray-100"
-                                    value={Number(rowSelected.OnHand)}
-                                    isReadOnly={true}
-                                >
-                                    <NumberInputField />
-                                </NumberInput>
+                            <div className="mb-5">
+                                <div className="flex gap-x-2">
+                                    <div className="w-[75%]">
+                                        <span>Tồn trong kho</span>
+                                        <NumberInput
+                                            className="bg-gray-100"
+                                            value={Number(rowSelected.OnHand)}
+                                            isReadOnly={true}
+                                        >
+                                            <NumberInputField />
+                                        </NumberInput>
+                                    </div>
+                                    <div>
+                                        <span> Đơn vị tính</span>
+                                        <Input
+                                            className="bg-gray-100"
+                                            value={rowSelected.UomCode}
+                                            isReadOnly={true}
+                                        />
+                                    </div>
+                                </div>
+
                             </div>
-                            <div>
-                                <span>Tồn thực tế</span>
-                                <NumberInput
-                                    min={0}
-                                    className=""
-                                    onChange={value => {
-                                        setRowSelected({ ...rowSelected, quantity: value });
-                                    }}
-                                >
-                                    <NumberInputField />
-                                </NumberInput>
+                            <div className="flex gap-x-2">
+                                <div className="w-[75%]">
+                                    <span>Tồn thực tế</span>
+                                    <NumberInput
+                                        min={0}
+                                        className=""
+                                        onChange={value => {
+                                            setRowSelected({ ...rowSelected, quantity: value });
+                                        }}
+                                    >
+                                        <NumberInputField />
+                                    </NumberInput>
+                                </div>
+                                <div>
+                                    <span> Đơn vị tính</span>
+                                    <Input
+                                        className="bg-gray-100"
+                                        value={rowSelected.UomCode}
+                                        isReadOnly={true}
+                                    />
+                                </div>
                             </div>
                         </AlertDialogBody>
 
@@ -617,9 +646,9 @@ const PrintInventoryPosting = () => {
 
                         <AlertDialogBody>
                             <Input placeholder="Tìm theo barcode hoặc mã sản phẩm" className="mb-2" onChange={e => setItemAdded({
-                                    ...itemAdded,
-                                    code: e.target.value
-                                })}
+                                ...itemAdded,
+                                code: e.target.value
+                            })}
                             />
                             {
                                 itemAdded.error && (<span className="mt-2 text-red-600">{itemAdded.error}</span>)
