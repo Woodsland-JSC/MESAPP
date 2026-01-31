@@ -77,8 +77,13 @@ function WipProductionOrderReport() {
             filter: true
         },
         {
+            field: 'NameTo',
+            headerName: 'Công đoạn SX',
+            filter: true
+        },
+        {
             field: 'NameTOTT',
-            headerName: 'Công đoạn',
+            headerName: 'Công đoạn tiếp theo',
             filter: true
         },
         {
@@ -243,7 +248,7 @@ function WipProductionOrderReport() {
                                 Loi: Number(lsx.Loi),
                                 ConLai: Number(lsx.ConLai),
                                 TO: detail.TO,
-                                NameTo: detail.NameTo,
+                                NameTo: detail.NameTO,
                                 TOTT: detail.TOTT,
                                 NameTOTT: detail.NameTOTT
                             });
