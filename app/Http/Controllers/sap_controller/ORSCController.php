@@ -44,6 +44,7 @@ class ORSCController extends Controller
 
     public function getTeamCdoanHT(Request $request, ORSCService $orscService){
         $factory = $request->query('factory');
-        return $orscService->getTeamCdoanHT($factory);
+        $wh = $request->query('wh');
+        return $orscService->getTeamCdoanHT($factory, $wh);
     }
 }

@@ -308,9 +308,9 @@ const PrintInventoryPosting = () => {
         }
     }
 
-    const getTeamsHT = async (factory) => {
+    const getTeamsHT = async (factory, wh) => {
         try {
-            let res = await getTeamCdoanHT(factory);
+            let res = await getTeamCdoanHT(factory, wh);
             setTeams(res.map(team => (
                 {
                     label: `${team.Name}`,
@@ -328,10 +328,13 @@ const PrintInventoryPosting = () => {
 
     useEffect(() => {
         getWarehouses();
-        if(factory){
-            getTeamsHT(factory.value)
-        }
     }, [factory])
+
+    useEffect(() => {
+        if( warehouse){
+            getTeamsHT(factory ? factory.value : user?.plant, warehouse.value);
+        }
+    }, [warehouse])
 
     useEffect(() => {
         getFactoryCBG();

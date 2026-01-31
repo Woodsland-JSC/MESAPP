@@ -26,8 +26,14 @@ class ORSCService
     SQL;
     private $SQL_GET_TEAM_CDOAN_HT = <<<SQL
         select ORSC."VisResCode" "Code", 
-        ORSC."ResName" "Name",
-        ORSC."U_CDOAN" "CDOAN" from ORSC where "U_CDOAN" = 'HT' AND "U_FAC"= ? AND "validFor"='Y'
+            ORSC."ResName" "Name",
+            ORSC."U_CDOAN" "CDOAN"
+        from ORSC JOIN RSC1 ON ORSC."VisResCode" = RSC1."ResCode"
+        where ORSC."U_CDOAN" = 'HT' 
+        AND ORSC."U_FAC"= ? 
+        AND ORSC."validFor"='Y'
+        AND RSC1."WhsCode" = ?
+        AND RSC1."Locked" = 'N'
     SQL;
 
     public function __construct(HanaService $hanaService)
@@ -55,9 +61,9 @@ class ORSCService
         }
     }
 
-    public function getTeamCdoanHT($factory){
+    public function getTeamCdoanHT($factory, $wh){
         try {
-            return $this->hanaService->select($this->SQL_GET_TEAM_CDOAN_HT, [$factory]);
+            return $this->hanaService->select($this->SQL_GET_TEAM_CDOAN_HT, [$factory, $wh]);
         } catch (\Throwable $th) {
             throw new Exception($th->getMessage());
         }
