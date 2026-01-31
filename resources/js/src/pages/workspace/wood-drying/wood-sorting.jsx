@@ -2208,9 +2208,9 @@ function WoodSorting() {
             {loading && <Loader />}
 
             {
-                (user?.role == 1) && (
+                (user?.role == 1 && currentPalletCreated) && (
                     <Drawer
-                        isOpen={isOpenQR || true}
+                        isOpen={false}
                         placement='bottom'
                         onClose={() => {
                             onCloseQR();

@@ -262,9 +262,18 @@ function FinishedGoodsReceipt() {
 
         for (const key in data) {
             const item = data[key];
+            
             const filteredDetails = item.Details.filter((detail) => {
-                const subitem = `${detail.ChildName} (${detail.CDay}*${detail.CRong}*${detail.CDai})`;
+                let subitem = `${detail.ChildName} (${detail.CDay}*${detail.CRong}*${detail.CDai})`;
 
+                let lsx = detail?.LSX?.map((lsxItem) => {
+                    if(lsxItem?.LSX?.includes(searchTerm)) return lsxItem.LSX;
+                }).join("_");
+
+                if(lsx){
+                    subitem = `${subitem} (${lsx})`;
+                }
+                
                 // Chuyển đổi cả searchTerm và subitem về chữ thường hoặc chữ hoa trước khi so sánh
                 const searchTermLower = searchTerm.toLowerCase();
                 const subitemLower = subitem.toLowerCase();
