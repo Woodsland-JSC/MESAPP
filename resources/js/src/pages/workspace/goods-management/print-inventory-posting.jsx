@@ -368,8 +368,8 @@ const PrintInventoryPosting = () => {
                         </div>
                     </div>
 
-                    <div className="flex justify-between bg-white mb-4 p-4 pt-3">
-                        <div className="w-[75%] flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-4 lg:space-x-4 md:space-x-4 space-x-0  rounded-xl  gap-x-2 gap-y-2 items-center">
+                    <div className="block md:block justify-between bg-white mb-4 p-4 pt-3">
+                        <div className="w-full flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-4 lg:space-x-4 md:space-x-4 space-x-0  rounded-xl  gap-x-2 gap-y-2 items-center">
                             {user?.role == 1 && (
                                 <div className="md:w-1/3 w-full">
                                     <label className=" text-sm font-medium text-gray-900">
@@ -412,7 +412,7 @@ const PrintInventoryPosting = () => {
                                 />
                             </div>
                         </div>
-                        <div className="w-[25%] md:flex hidden md:items-center md:justify-end">
+                        <div className="w-full md:flex block md:items-center  mt-4">
                             <button
                                 onClick={onOpenAddItem}
                                 type="button"
